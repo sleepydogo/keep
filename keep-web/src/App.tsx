@@ -55,7 +55,7 @@ export const App = () => {
   if (status === "loading") {
     return (
       <main className="page">
-        <h1>KEEP</h1>
+        <h1 className="brand-title">KEEP <i /></h1>
         <p className="subtitle">Cargando…</p>
       </main>
     );

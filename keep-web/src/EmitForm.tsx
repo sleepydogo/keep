@@ -152,7 +152,7 @@ export const EmitForm = ({ user, emisor, onLogout }: Props) => {
     <main className="page">
       <header className="topbar">
         <div>
-          <h1>KEEP</h1>
+          <h1 className="brand-title">KEEP <i /></h1>
           <p className="subtitle">
             {user.orgName} · {user.username}
           </p>
