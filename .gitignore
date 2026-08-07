@@ -5,3 +5,4 @@ src/managed/
 !.env.example
 midnight-level-db/
 .wallet-state/
+.expo
