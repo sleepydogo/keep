@@ -1,0 +1,5 @@
+- **Papel cálido (`#F6F1E6`) + tinta casi negra (`#1C2431`)** en vez de blanco/negro clínicos — evita que se sienta "app de banco" o "app cripto". Se siente a documento físico, algo que uno guarda.
+- **Oro envejecido (`#B0813A`)** para todo lo verificado/sellado. Es el color de un sello de cera, una medalla, el borde dorado de un diploma — asocia inconscientemente "esto es legítimo" sin necesitar el ícono de un candado o blockchain.
+- **Verde azulado apagado (`#2E6B63`)** solo para la acción principal (Aceptar, Enviar). Transmite calma y "seguir adelante" — útil porque acá el contenido puede ser sensible (una receta médica) y no querés un verde brillante tipo "éxito de videojuego".
+- **Terracota apagado (`#9B4A3B`)**, no rojo puro, para Rechazar. Rechazar una credencial no es un error del sistema, es una decisión del usuario — no merece alarma roja.
+- **Serif Fraunces** para títulos de credenciales (se siente grabado, tipo diploma) + **Inter** para toda la interfaz funcional + **mono** solo en fechas, como si fueran selladas a máquina.
