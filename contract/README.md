@@ -99,16 +99,25 @@ Las variables salen de `.env` en la raíz del repo.
 
 | Variable | Para qué |
 | --- | --- |
-| `KEEP_DEPLOY_SEED` | Wallet que paga. Con DUST. Si viene de frase BIP39, derivar con PBKDF2 |
+| `KEEP_DEPLOY_SEED` | Wallet que paga el deploy y el registro. Con DUST. Si viene de frase BIP39, derivar con PBKDF2 |
 | `KEEP_EMISOR_SECRET` | 32 bytes hex. Identidad del emisor, sin fondos |
 | `VITE_CONTRACT_ADDRESS` | La devuelve `deploy` |
+| `VITE_HOLDER_SEED` | Wallet del ciudadano. **Sin fondos** — de eso se trata |
+| `KEEP_CES_URL` | Server de Capacity Exchange. Default `http://localhost:3000` |
 
 ```bash
 npm run deploy      # publica el contrato, imprime la dirección
 npm run registrar   # registra el emisor on-chain
+npm run presentar   # emite una credencial y la presenta, patrocinada por CES
 ```
 
 `registrar` es idempotente: si el `emisorId` ya está, avisa y no manda nada.
+
+`presentar` es el test end-to-end del circuito principal contra la red: emite off-chain,
+prueba en ZK contra el proof server local, manda la transacción al Capacity Exchange
+para que le ponga el DUST, y lee el resultado del indexer. Necesita el server de CES
+levantado. Para que el test valga, `VITE_HOLDER_SEED` tiene que ser una seed **sin
+fondear**: si tiene DUST propio no estás probando nada del gasless.
 
 ## Trampas conocidas
 
