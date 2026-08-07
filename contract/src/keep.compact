@@ -1,0 +1,49 @@
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+import "schnorr" prefix Schnorr_;
+
+export { Schnorr_SchnorrSignature };
+
+export ledger emisores: Map<Bytes<32>, JubjubPoint>;
+export ledger verificaciones: Map<Bytes<32>, Boolean>;
+
+witness credencial(): [Uint<64>, MerkleTreePath<4, Field>, Schnorr_SchnorrSignature, Bytes<32>];
+
+export circuit registrarEmisor(emisorId: Bytes<32>, pk: JubjubPoint): [] {
+    assert(!emisores.member(disclose(emisorId)), "Emisor ya registrado");
+    emisores.insert(disclose(emisorId), disclose(pk));
+}
+
+export circuit presentarVigencia(emisorId: Bytes<32>, nonce: Bytes<32>, fechaConsulta: Uint<64>): [] {
+    const presentacionId = disclose(persistentHash<[Bytes<12>, Bytes<32>, Uint<64>]>(
+        ["keep:present", nonce, fechaConsulta]));
+    assert(!verificaciones.member(presentacionId), "Presentacion ya usada");
+    assert(emisores.member(disclose(emisorId)), "Emisor no registrado");
+
+    const [fechaVencimiento, path, firma, holderSecret] = credencial();
+
+    assert(path.leaf == hojaVencimiento(fechaVencimiento), "La hoja no es la fecha de vencimiento");
+
+    const raiz = merkleTreePathRoot<4, Field>(path).field;
+
+    Schnorr_schnorrVerify<2>([holderId(holderSecret), raiz], firma, emisores.lookup(disclose(emisorId)));
+
+    verificaciones.insert(presentacionId, disclose(fechaVencimiento >= fechaConsulta));
+}
+
+export pure circuit hojaVencimiento(fechaVencimiento: Uint<64>): Field {
+    return transientHash<[Bytes<10>, Field]>(["keep:vence", fechaVencimiento as Field]);
+}
+
+export pure circuit holderId(holderSecret: Bytes<32>): Field {
+    return transientHash<[Bytes<11>, Bytes<32>]>(["keep:holder", holderSecret]);
+}
+
+export pure circuit schnorrChallenge(
+    ann_x: Field, ann_y: Field,
+    pk_x: Field, pk_y: Field,
+    msg: Vector<2, Field>
+): Field {
+    return Schnorr_schnorrChallenge(ann_x, ann_y, pk_x, pk_y, msg);
+}
