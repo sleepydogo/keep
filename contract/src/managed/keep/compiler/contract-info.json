@@ -9,13 +9,6 @@
       "proof": true,
       "arguments": [
         {
-          "name": "emisorId",
-          "type": {
-            "type-name": "Bytes",
-            "length": 32
-          }
-        },
-        {
           "name": "pk",
           "type": {
             "type-name": "Alias",
@@ -64,6 +57,67 @@
         "type-name": "Tuple",
         "types": [
         ]
+      }
+    },
+    {
+      "name": "presentacionId",
+      "pure": true,
+      "proof": false,
+      "arguments": [
+        {
+          "name": "nonce",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        },
+        {
+          "name": "fechaConsulta",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Bytes",
+        "length": 32
+      }
+    },
+    {
+      "name": "claveFirmaEmisor",
+      "pure": true,
+      "proof": false,
+      "arguments": [
+        {
+          "name": "secreto",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Bytes",
+        "length": 32
+      }
+    },
+    {
+      "name": "derivarEmisorId",
+      "pure": true,
+      "proof": false,
+      "arguments": [
+        {
+          "name": "secreto",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Bytes",
+        "length": 32
       }
     },
     {
@@ -254,6 +308,15 @@
             "length": 32
           }
         ]
+      }
+    },
+    {
+      "name": "emisorSecret",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Bytes",
+        "length": 32
       }
     }
   ],
