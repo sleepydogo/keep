@@ -28,8 +28,15 @@ export type Credencial = {
 };
 
 export type KeepPrivateState = {
-  holderSecret: Uint8Array;
-  credencial: Credencial;
+  emisorSecret?: Uint8Array;
+  holderSecret?: Uint8Array;
+  credencial?: Credencial;
+};
+
+const requerido = <T>(valor: T | undefined, nombre: string): T => {
+  if (valor === undefined)
+    throw new Error(`Falta ${nombre} en el estado privado`);
+  return valor;
 };
 
 const alineado = (x: bigint) => ({
@@ -61,8 +68,12 @@ const aBigInt = (b: Uint8Array): bigint =>
 
 const escalarAleatorio = () => aBigInt(bytesAleatorios(32)) % ORDEN;
 
-export const clavesEmisor = (): { sk: bigint; pk: JubjubPoint } => {
-  const sk = escalarAleatorio();
+// La clave de firma sale del mismo secreto que el emisorId: el emisor guarda un
+// solo valor y reiniciar el servicio no le cambia la clave.
+export const clavesEmisor = (
+  emisorSecret: Uint8Array,
+): { sk: bigint; pk: JubjubPoint } => {
+  const sk = aBigInt(pureCircuits.claveFirmaEmisor(emisorSecret)) % ORDEN;
   return { sk, pk: ecMulGenerator(sk) };
 };
 
@@ -108,13 +119,22 @@ export const witnesses = {
   }: WitnessContext<Ledger, KeepPrivateState>): [
     KeepPrivateState,
     [bigint, MerkleTreePath<bigint>, Schnorr_SchnorrSignature, Uint8Array],
-  ] => [
+  ] => {
+    const cred = requerido(privateState.credencial, "credencial");
+    return [
+      privateState,
+      [
+        cred.fechaVencimiento,
+        camino(cred.hojas, 0),
+        cred.firma,
+        requerido(privateState.holderSecret, "holderSecret"),
+      ],
+    ];
+  },
+  emisorSecret: ({
     privateState,
-    [
-      privateState.credencial.fechaVencimiento,
-      camino(privateState.credencial.hojas, 0),
-      privateState.credencial.firma,
-      privateState.holderSecret,
-    ],
-  ],
+  }: WitnessContext<Ledger, KeepPrivateState>): [
+    KeepPrivateState,
+    Uint8Array,
+  ] => [privateState, requerido(privateState.emisorSecret, "emisorSecret")],
 };

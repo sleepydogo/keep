@@ -13,20 +13,30 @@ import {
   emitir,
   witnesses,
 } from "../credencial.js";
-import { Contract, ledger } from "../managed/keep/contract/index.js";
+import {
+  Contract,
+  ledger,
+  pureCircuits,
+} from "../managed/keep/contract/index.js";
 
 const DIA = 86400n;
 const AHORA = 1786000000n;
-const EMISOR_ID = new Uint8Array(32).fill(7);
 
-const escenario = (fechaVencimiento: bigint) => {
-  const { sk, pk } = clavesEmisor();
+const escenario = (fechaVencimiento: bigint, skDeLaFirma?: bigint) => {
+  const emisorSecret = bytesAleatorios(32);
+  const emisor = clavesEmisor(emisorSecret);
+  const emisorId = pureCircuits.derivarEmisorId(emisorSecret);
   const holderSecret = bytesAleatorios(32);
-  const credencial = emitir(sk, holderSecret, fechaVencimiento, [1n, 2n, 3n]);
+  const credencial = emitir(
+    skDeLaFirma ?? emisor.sk,
+    holderSecret,
+    fechaVencimiento,
+    [1n, 2n, 3n],
+  );
 
   const contrato = new Contract<KeepPrivateState>(witnesses);
   const inicial = contrato.initialState(
-    createConstructorContext({ holderSecret, credencial }, "0".repeat(64)),
+    createConstructorContext({ emisorSecret }, "0".repeat(64)),
   );
   let ctx: CircuitContext<KeepPrivateState> = {
     currentPrivateState: inicial.currentPrivateState,
@@ -37,20 +47,52 @@ const escenario = (fechaVencimiento: bigint) => {
       sampleContractAddress(),
     ),
   };
-  ctx = contrato.impureCircuits.registrarEmisor(ctx, EMISOR_ID, pk).context;
 
-  const presentar = (nonce: Uint8Array, fechaConsulta: bigint) => {
+  const registrar = () => {
+    ctx = contrato.impureCircuits.registrarEmisor(ctx, emisor.pk).context;
+  };
+  registrar();
+
+  ctx.currentPrivateState = { holderSecret, credencial };
+
+  const presentar = (
+    nonce: Uint8Array,
+    fechaConsulta: bigint,
+    id: Uint8Array = emisorId,
+  ) => {
     ctx = contrato.impureCircuits.presentarVigencia(
       ctx,
-      EMISOR_ID,
+      id,
       nonce,
       fechaConsulta,
     ).context;
     return [...ledger(ctx.currentQueryContext.state).verificaciones];
   };
 
-  return { contrato, presentar, pk };
+  const volverAEmisor = () => {
+    ctx.currentPrivateState = { emisorSecret };
+  };
+
+  return { presentar, registrar, volverAEmisor, emisorId };
 };
+
+describe("registrarEmisor", () => {
+  it("deriva el emisorId del secreto del emisor", () => {
+    const secreto = bytesAleatorios(32);
+    expect(pureCircuits.derivarEmisorId(secreto)).toEqual(
+      pureCircuits.derivarEmisorId(secreto),
+    );
+    expect(pureCircuits.derivarEmisorId(secreto)).not.toEqual(
+      pureCircuits.derivarEmisorId(bytesAleatorios(32)),
+    );
+  });
+
+  it("rechaza registrar dos veces el mismo secreto", () => {
+    const { registrar, volverAEmisor } = escenario(AHORA + 30n * DIA);
+    volverAEmisor();
+    expect(() => registrar()).toThrow("Emisor ya registrado");
+  });
+});
 
 describe("presentarVigencia", () => {
   it("da true con un certificado vigente", () => {
@@ -72,39 +114,20 @@ describe("presentarVigencia", () => {
     expect(() => presentar(nonce, AHORA)).toThrow("Presentacion ya usada");
   });
 
-  it("rechaza una firma de otro emisor", () => {
-    const otro = clavesEmisor();
-    const holderSecret = bytesAleatorios(32);
-    const credencial = emitir(otro.sk, holderSecret, AHORA + 30n * DIA, [
-      1n,
-      2n,
-      3n,
-    ]);
-    const contrato = new Contract<KeepPrivateState>(witnesses);
-    const inicial = contrato.initialState(
-      createConstructorContext({ holderSecret, credencial }, "0".repeat(64)),
-    );
-    let ctx: CircuitContext<KeepPrivateState> = {
-      currentPrivateState: inicial.currentPrivateState,
-      currentZswapLocalState: inicial.currentZswapLocalState,
-      costModel: CostModel.initialCostModel(),
-      currentQueryContext: new QueryContext(
-        inicial.currentContractState.data,
-        sampleContractAddress(),
-      ),
-    };
-    ctx = contrato.impureCircuits.registrarEmisor(
-      ctx,
-      EMISOR_ID,
-      clavesEmisor().pk,
-    ).context;
+  it("rechaza un emisor no registrado", () => {
+    const { presentar } = escenario(AHORA + 30n * DIA);
     expect(() =>
-      contrato.impureCircuits.presentarVigencia(
-        ctx,
-        EMISOR_ID,
-        bytesAleatorios(32),
-        AHORA,
-      ),
-    ).toThrow("Firma del emisor invalida");
+      presentar(bytesAleatorios(32), AHORA, bytesAleatorios(32)),
+    ).toThrow("Emisor no registrado");
+  });
+
+  it("rechaza una firma de otro emisor", () => {
+    const { presentar } = escenario(
+      AHORA + 30n * DIA,
+      clavesEmisor(bytesAleatorios(32)).sk,
+    );
+    expect(() => presentar(bytesAleatorios(32), AHORA)).toThrow(
+      "Firma del emisor invalida",
+    );
   });
 });

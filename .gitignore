@@ -3,3 +3,6 @@ dist/
 src/managed/
 .env*
 !.env.example
+midnight-level-db/
+.wallet-state/
+.expo
