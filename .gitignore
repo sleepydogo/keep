@@ -6,3 +6,6 @@ src/managed/
 .cursor
 *.db
 keep-web/data/
+midnight-level-db/
+.wallet-state/
+.expo

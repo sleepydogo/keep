@@ -9,16 +9,17 @@ export ledger emisores: Map<Bytes<32>, JubjubPoint>;
 export ledger verificaciones: Map<Bytes<32>, Boolean>;
 
 witness credencial(): [Uint<64>, MerkleTreePath<4, Field>, Schnorr_SchnorrSignature, Bytes<32>];
+witness emisorSecret(): Bytes<32>;
 
-export circuit registrarEmisor(emisorId: Bytes<32>, pk: JubjubPoint): [] {
-    assert(!emisores.member(disclose(emisorId)), "Emisor ya registrado");
-    emisores.insert(disclose(emisorId), disclose(pk));
+export circuit registrarEmisor(pk: JubjubPoint): [] {
+    const id = disclose(derivarEmisorId(emisorSecret()));
+    assert(!emisores.member(id), "Emisor ya registrado");
+    emisores.insert(id, disclose(pk));
 }
 
 export circuit presentarVigencia(emisorId: Bytes<32>, nonce: Bytes<32>, fechaConsulta: Uint<64>): [] {
-    const presentacionId = disclose(persistentHash<[Bytes<12>, Bytes<32>, Uint<64>]>(
-        ["keep:present", nonce, fechaConsulta]));
-    assert(!verificaciones.member(presentacionId), "Presentacion ya usada");
+    const id = disclose(presentacionId(nonce, fechaConsulta));
+    assert(!verificaciones.member(id), "Presentacion ya usada");
     assert(emisores.member(disclose(emisorId)), "Emisor no registrado");
 
     const [fechaVencimiento, path, firma, holderSecret] = credencial();
@@ -29,7 +30,19 @@ export circuit presentarVigencia(emisorId: Bytes<32>, nonce: Bytes<32>, fechaCon
 
     Schnorr_schnorrVerify<2>([holderId(holderSecret), raiz], firma, emisores.lookup(disclose(emisorId)));
 
-    verificaciones.insert(presentacionId, disclose(fechaVencimiento >= fechaConsulta));
+    verificaciones.insert(id, disclose(fechaVencimiento >= fechaConsulta));
+}
+
+export pure circuit presentacionId(nonce: Bytes<32>, fechaConsulta: Uint<64>): Bytes<32> {
+    return persistentHash<[Bytes<12>, Bytes<32>, Uint<64>]>(["keep:present", nonce, fechaConsulta]);
+}
+
+export pure circuit claveFirmaEmisor(secreto: Bytes<32>): Bytes<32> {
+    return persistentHash<[Bytes<16>, Bytes<32>]>(["keep:emisor:sign", secreto]);
+}
+
+export pure circuit derivarEmisorId(secreto: Bytes<32>): Bytes<32> {
+    return persistentHash<[Bytes<11>, Bytes<32>]>(["keep:emisor", secreto]);
 }
 
 export pure circuit hojaVencimiento(fechaVencimiento: Uint<64>): Field {

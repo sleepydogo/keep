@@ -1,0 +1,72 @@
+import type { Credential } from '@/types/credential';
+
+export type { Credential, CredentialStatus } from '@/types/credential';
+
+export const credentials: Credential[] = [
+  {
+    id: 'age',
+    type: 'Identidad',
+    title: 'Mayoría de edad',
+    issuer: 'Registro Civil',
+    issuerDetail: 'República Argentina',
+    issued: '12 jun 2026',
+    validUntil: '12 jun 2027',
+    details: 'Acredita que la persona es mayor de 18 años.',
+    mark: '18',
+    tone: '#0F4C81',
+    gradient: 'linear-gradient(135deg, #0A2E5C 0%, #1652A0 50%, #1E62C8 100%)',
+    cardNumber: '•••• 1802',
+    badge: 'DNI DIGITAL',
+    status: 'valid',
+  },
+  {
+    id: 'degree',
+    type: 'Título Universitario',
+    title: 'Licenciatura en Diseño',
+    issuer: 'Universidad de Buenos Aires',
+    issuerDetail: 'Facultad de Arquitectura, Diseño y Urbanismo',
+    issued: '18 dic 2025',
+    validUntil: 'Sin vencimiento',
+    details: 'Título de grado emitido por la Universidad de Buenos Aires.',
+    mark: 'UBA',
+    tone: '#B0813A',
+    gradient: 'linear-gradient(135deg, #2D2318 0%, #5E4A28 50%, #A68344 100%)',
+    cardNumber: '•••• 2025',
+    badge: 'FADU UBA',
+    status: 'valid',
+  },
+  {
+    id: 'driver',
+    type: 'Licencia Digital',
+    title: 'Conducción Clase B',
+    issuer: 'Agencia Nacional de Seguridad Vial',
+    issuerDetail: 'Gobierno de la Nación Argentina',
+    issued: '15 ene 2026',
+    validUntil: '15 ene 2031',
+    details: 'Habilita la conducción de automóviles y camionetas particulares.',
+    mark: 'B1',
+    tone: '#1B4D3E',
+    gradient: 'linear-gradient(135deg, #0D2820 0%, #164235 50%, #2A6B56 100%)',
+    cardNumber: '•••• 5082',
+    badge: 'ANSV',
+    status: 'valid',
+  },
+];
+
+export const pendingCredential: Credential = {
+  id: 'repro',
+  type: 'Autorización',
+  title: 'Autorización Vigente',
+  issuer: 'Ministerio de Salud',
+  issuerDetail: 'República Argentina',
+  issued: '7 ago 2026',
+  validUntil: '7 ago 2027',
+  details: 'Autorización oficial emitida por el Ministerio de Salud.',
+  mark: '✓',
+  tone: '#E52D27',
+  gradient: 'linear-gradient(135deg, #A81B1E 0%, #D32F2F 50%, #FF5252 100%)',
+  cardNumber: '•••• 9428',
+  badge: 'MSAL',
+  status: 'pending',
+};
+
