@@ -40,7 +40,11 @@ export const api = {
     }),
   logout: () =>
     request<{ ok: boolean }>("/api/logout", { method: "POST" }),
-  registerDevice: (body: { publicKey: string; label?: string }) =>
+  registerDevice: (body: {
+    emisorId: string;
+    pk: { x: string; y: string };
+    label?: string;
+  }) =>
     request<{ device: { id: string; status: string } }>("/api/devices", {
       method: "POST",
       body: JSON.stringify(body),

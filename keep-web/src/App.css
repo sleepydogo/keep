@@ -80,6 +80,15 @@ textarea {
   font-size: 0.75rem;
   font-weight: 400;
   color: #5a6b66;
+  word-break: break-all;
+}
+
+.hint.ok {
+  color: #1f3d32;
+}
+
+.hint.bad {
+  color: #8b2e2e;
 }
 
 button[type="submit"] {

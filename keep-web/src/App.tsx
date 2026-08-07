@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import { api, type User } from "./api.js";
 import { Auth } from "./Auth.js";
-import { ensureDeviceKey } from "./deviceKey.js";
+import { ensureDeviceKey, type EmisorJubjub } from "./deviceKey.js";
 import { EmitForm } from "./EmitForm.js";
 
 type Status = "loading" | "auth" | "ready";
@@ -10,20 +10,21 @@ type Status = "loading" | "auth" | "ready";
 export const App = () => {
   const [status, setStatus] = useState<Status>("loading");
   const [user, setUser] = useState<User | null>(null);
-  const [devicePublicKey, setDevicePublicKey] = useState("");
+  const [emisor, setEmisor] = useState<EmisorJubjub | null>(null);
   const [error, setError] = useState("");
 
   const bootSession = async (next: User) => {
     setError("");
     setUser(next);
     try {
-      const publicKey = await ensureDeviceKey(next.id, async (pk) => {
+      const jubjub = await ensureDeviceKey(next.id, async (e) => {
         await api.registerDevice({
-          publicKey: pk,
+          emisorId: e.emisorId,
+          pk: e.pk,
           label: navigator.userAgent.slice(0, 80),
         });
       });
-      setDevicePublicKey(publicKey);
+      setEmisor(jubjub);
       setStatus("ready");
     } catch (err) {
       setError(
@@ -33,6 +34,7 @@ export const App = () => {
       );
       setStatus("auth");
       setUser(null);
+      setEmisor(null);
     }
   };
 
@@ -46,7 +48,7 @@ export const App = () => {
   const onLogout = async () => {
     await api.logout().catch(() => undefined);
     setUser(null);
-    setDevicePublicKey("");
+    setEmisor(null);
     setStatus("auth");
   };
 
@@ -59,22 +61,14 @@ export const App = () => {
     );
   }
 
-  if (status === "auth" || !user) {
+  if (status === "auth" || !user || !emisor) {
     return (
       <>
-        {error && (
-          <p className="banner-error">{error}</p>
-        )}
+        {error && <p className="banner-error">{error}</p>}
         <Auth onAuth={bootSession} />
       </>
     );
   }
 
-  return (
-    <EmitForm
-      user={user}
-      devicePublicKey={devicePublicKey}
-      onLogout={onLogout}
-    />
-  );
+  return <EmitForm user={user} emisor={emisor} onLogout={onLogout} />;
 };

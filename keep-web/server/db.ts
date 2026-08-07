@@ -32,7 +32,8 @@ db.exec(`
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL REFERENCES users(id),
     org_id TEXT NOT NULL REFERENCES orgs(id),
-    public_key TEXT NOT NULL UNIQUE,
+    emisor_id TEXT NOT NULL UNIQUE,
+    public_key TEXT NOT NULL,
     label TEXT,
     status TEXT NOT NULL DEFAULT 'active',
     created_at TEXT NOT NULL
@@ -45,3 +46,23 @@ db.exec(`
     created_at TEXT NOT NULL
   );
 `);
+
+// Migración suave desde schema ECDSA (public_key UNIQUE sin emisor_id)
+const cols = db.prepare(`PRAGMA table_info(devices)`).all() as {
+  name: string;
+}[];
+if (cols.length && !cols.some((c) => c.name === "emisor_id")) {
+  db.exec(`
+    DROP TABLE devices;
+    CREATE TABLE devices (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id),
+      org_id TEXT NOT NULL REFERENCES orgs(id),
+      emisor_id TEXT NOT NULL UNIQUE,
+      public_key TEXT NOT NULL,
+      label TEXT,
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TEXT NOT NULL
+    );
+  `);
+}

@@ -162,16 +162,22 @@ app.post("/api/devices", (req, res) => {
     return;
   }
 
-  const publicKey = String(req.body?.publicKey ?? "").trim();
+  const emisorId = String(req.body?.emisorId ?? "").trim();
+  const pk = req.body?.pk as { x?: string; y?: string } | undefined;
   const label = String(req.body?.label ?? "Este navegador").trim();
-  if (!publicKey) {
-    res.status(400).json({ error: "Falta la clave pública del dispositivo." });
+
+  if (!emisorId || !pk?.x || !pk?.y) {
+    res.status(400).json({
+      error: "Falta la identidad Jubjub del dispositivo (emisorId, pk).",
+    });
     return;
   }
 
+  const publicKey = JSON.stringify({ x: pk.x, y: pk.y });
+
   const existing = db
-    .prepare(`SELECT id, status FROM devices WHERE public_key = ?`)
-    .get(publicKey) as { id: string; status: string } | undefined;
+    .prepare(`SELECT id, status FROM devices WHERE emisor_id = ?`)
+    .get(emisorId) as { id: string; status: string } | undefined;
 
   if (existing) {
     res.json({ device: { id: existing.id, status: existing.status } });
@@ -180,9 +186,10 @@ app.post("/api/devices", (req, res) => {
 
   const id = randomUUID();
   db.prepare(
-    `INSERT INTO devices (id, user_id, org_id, public_key, label, status, created_at)
-     VALUES (?, ?, ?, ?, ?, 'active', ?)`,
-  ).run(id, user.id, user.org_id, publicKey, label, nowIso());
+    `INSERT INTO devices
+      (id, user_id, org_id, emisor_id, public_key, label, status, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'active', ?)`,
+  ).run(id, user.id, user.org_id, emisorId, publicKey, label, nowIso());
 
   res.status(201).json({ device: { id, status: "active" } });
 });
