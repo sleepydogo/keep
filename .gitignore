@@ -3,3 +3,6 @@ dist/
 src/managed/
 .env*
 !.env.example
+.cursor
+*.db
+keep-web/data/
