@@ -60,8 +60,23 @@ Después, con esa seed en `.env` como `KEEP_DEPLOY_SEED`:
 npm run deploy
 ```
 
-Devuelve la `KEEP_CONTRACT_ADDRESS`, que va al `.env`. Se hace una sola vez: el
+Devuelve la `VITE_CONTRACT_ADDRESS`, que va al `.env`. Se hace una sola vez: el
 contrato queda publicado y todo el equipo comparte esa dirección.
+
+Después, `npm run registrar` publica la clave del emisor y `npm run presentar` corre
+el flujo completo contra la red. Ver [contract/README.md](contract/README.md).
+
+## Sin DUST para el ciudadano
+
+Las presentaciones las patrocina un
+[Capacity Exchange](https://github.com/SundaeSwap-finance/capacity-exchange), así que
+el holder no necesita tokens ni saber que hay una blockchain. El server corre aparte:
+
+```bash
+cd ../capacity-exchange
+export NETWORK_ID=preview PROOF_SERVER_URL=http://127.0.0.1:6300
+task dev:server
+```
 
 ## Correr
 
