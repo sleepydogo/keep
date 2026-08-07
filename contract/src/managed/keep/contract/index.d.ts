@@ -16,11 +16,11 @@ export type Witnesses<PS> = {
                                                                           },
                                                                           Schnorr_SchnorrSignature,
                                                                           Uint8Array]];
+  emisorSecret(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, Uint8Array];
 }
 
 export type ImpureCircuits<PS> = {
   registrarEmisor(context: __compactRuntime.CircuitContext<PS>,
-                  emisorId_0: Uint8Array,
                   pk_0: __compactRuntime.JubjubPoint): __compactRuntime.CircuitResults<PS, []>;
   presentarVigencia(context: __compactRuntime.CircuitContext<PS>,
                     emisorId_0: Uint8Array,
@@ -30,7 +30,6 @@ export type ImpureCircuits<PS> = {
 
 export type ProvableCircuits<PS> = {
   registrarEmisor(context: __compactRuntime.CircuitContext<PS>,
-                  emisorId_0: Uint8Array,
                   pk_0: __compactRuntime.JubjubPoint): __compactRuntime.CircuitResults<PS, []>;
   presentarVigencia(context: __compactRuntime.CircuitContext<PS>,
                     emisorId_0: Uint8Array,
@@ -39,6 +38,9 @@ export type ProvableCircuits<PS> = {
 }
 
 export type PureCircuits = {
+  presentacionId(nonce_0: Uint8Array, fechaConsulta_0: bigint): Uint8Array;
+  claveFirmaEmisor(secreto_0: Uint8Array): Uint8Array;
+  derivarEmisorId(secreto_0: Uint8Array): Uint8Array;
   hojaVencimiento(fechaVencimiento_0: bigint): bigint;
   holderId(holderSecret_0: Uint8Array): bigint;
   schnorrChallenge(ann_x_0: bigint,
@@ -50,12 +52,18 @@ export type PureCircuits = {
 
 export type Circuits<PS> = {
   registrarEmisor(context: __compactRuntime.CircuitContext<PS>,
-                  emisorId_0: Uint8Array,
                   pk_0: __compactRuntime.JubjubPoint): __compactRuntime.CircuitResults<PS, []>;
   presentarVigencia(context: __compactRuntime.CircuitContext<PS>,
                     emisorId_0: Uint8Array,
                     nonce_0: Uint8Array,
                     fechaConsulta_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  presentacionId(context: __compactRuntime.CircuitContext<PS>,
+                 nonce_0: Uint8Array,
+                 fechaConsulta_0: bigint): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  claveFirmaEmisor(context: __compactRuntime.CircuitContext<PS>,
+                   secreto_0: Uint8Array): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  derivarEmisorId(context: __compactRuntime.CircuitContext<PS>,
+                  secreto_0: Uint8Array): __compactRuntime.CircuitResults<PS, Uint8Array>;
   hojaVencimiento(context: __compactRuntime.CircuitContext<PS>,
                   fechaVencimiento_0: bigint): __compactRuntime.CircuitResults<PS, bigint>;
   holderId(context: __compactRuntime.CircuitContext<PS>,

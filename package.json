@@ -13,6 +13,9 @@
   ],
   "scripts": {
     "compact": "npm run compact -w @keep/contract",
+    "deploy": "npm run deploy -w @keep/contract",
+    "registrar": "npm run registrar -w @keep/contract",
+    "presentar": "npm run presentar -w @keep/contract",
     "dev": "concurrently -n ward,keep-web -c cyan,magenta npm:dev:ward npm:dev:web",
     "dev:ward": "npm run dev -w @keep/ward",
     "dev:web": "npm run dev -w @keep/web",
@@ -27,6 +30,10 @@
     "prettier": "^3.8.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.61.0"
+  },
+  "allowScripts": {
+    "classic-level@3.0.0": true,
+    "msgpackr-extract@3.0.4": true
   },
   "dependencies": {
     "expo": "^57.0.11"

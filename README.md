@@ -32,9 +32,36 @@ npm install
 cp .env.example .env
 ```
 
-Cargar en `.env` dos seeds (hex de 64 chars) fondeadas desde el
-[faucet de Preview](https://midnight-tmnight-preview.nethermind.dev/): una para el
-emisor y otra para el holder.
+## Publicar el contrato
+
+Hace falta una wallet con DUST. Conseguirla con el generador oficial, que crea la
+seed, te muestra la dirección para el faucet, espera los fondos y registra el NIGHT
+para que genere DUST:
+
+```bash
+git clone https://github.com/midnightntwrk/midnight-dust-generator
+cd midnight-dust-generator && npm install && npm start
+```
+
+Si en cambio ya tenés una wallet con tDUST y querés usar su frase de recuperación,
+derivá la seed con PBKDF2 como manda BIP39 — hexear la frase como texto deriva otra
+wallet, vacía, y sin dar error:
+
+```bash
+node -e "console.log(require('crypto').pbkdf2Sync(process.argv[1].normalize('NFKD'),'mnemonic',2048,64,'sha512').toString('hex'))" "palabra1 ... palabra24"
+```
+
+Usá la frase de recuperación en un `.env` sólo si esa wallet es exclusivamente de
+testnet.
+
+Después, con esa seed en `.env` como `KEEP_DEPLOY_SEED`:
+
+```bash
+npm run deploy
+```
+
+Devuelve la `KEEP_CONTRACT_ADDRESS`, que va al `.env`. Se hace una sola vez: el
+contrato queda publicado y todo el equipo comparte esa dirección.
 
 ## Correr
 
@@ -50,8 +77,9 @@ npm run dev   # ward en :5173 y keep-web en :5174
 | `npm run compact` | Compila el contrato y regenera `contract/src/managed/` |
 | `npm test` | CI del contrato: compact, typecheck, lint, build, tests |
 
-`contract/src/managed/` es output del compilador y no está versionado: después de
-clonar hay que correr `npm run compact` al menos una vez.
+`contract/src/managed/` es output del compilador pero está versionado, así que el
+front no necesita el toolchain de Compact. Si tocás un `.compact`, recompilá y
+commiteá los artefactos.
 
 ## Estructura
 
