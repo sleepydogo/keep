@@ -12,8 +12,13 @@ export type Credential = {
   mark: string;
   tone: string;
   status: CredentialStatus;
+  cardNumber?: string;
+  gradient?: string;
+  badge?: string;
+  templateId?: string;
 };
 
-export type OnboardingStep = 'splash' | 'welcome' | 'warning' | 'creating' | 'ready' | 'wallet';
+export type OnboardingStep = 'splash' | 'welcome' | 'warning' | 'creating' | 'ready' | 'alias' | 'wallet';
 
 export type Screen = 'wallet' | 'pending' | 'added' | 'detail' | 'show';
+

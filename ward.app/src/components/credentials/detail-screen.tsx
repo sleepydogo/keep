@@ -1,98 +1,120 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { BackButton } from '@/components/ui/back-button';
-import { Button } from '@/components/ui/button';
-import { PageContainer } from '@/components/ui/page-container';
-import { CredentialInfo } from './credential-info';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
-import type { Credential } from '@/types/credential';
+import React, { useState } from "react";
+import { QRCode } from "@/components/ui/qr-code";
+import type { Credential } from "@/types/credential";
 
 type DetailScreenProps = {
   credential: Credential;
+  credentials?: Credential[];
+  onSelectCredential?: (cred: Credential) => void;
   onBack: () => void;
-  onShow: () => void;
 };
 
-const colors = Colors.light;
+export function DetailScreen({
+  credential,
+  credentials = [],
+  onSelectCredential,
+  onBack,
+}: DetailScreenProps) {
+  const [touchStart, setTouchStart] = useState<number | null>(null);
 
-export function DetailScreen({ credential, onBack, onShow }: DetailScreenProps) {
+  const currentIndex = credentials.findIndex((c) => c.id === credential.id);
+  const total = credentials.length;
+
+  const handleNext = () => {
+    if (currentIndex < total - 1 && onSelectCredential) {
+      onSelectCredential(credentials[currentIndex + 1]);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0 && onSelectCredential) {
+      onSelectCredential(credentials[currentIndex - 1]);
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const touchEnd = e.changedTouches[0].clientY;
+    const distance = touchStart - touchEnd;
+    const swipeThreshold = 50;
+
+    if (distance > swipeThreshold) {
+      handleNext();
+    } else if (distance < -swipeThreshold) {
+      handlePrev();
+    }
+    setTouchStart(null);
+  };
+
   return (
-    <PageContainer>
-      <BackButton onPress={onBack} />
-      <View style={[styles.detailCard, { borderTopColor: credential.tone }]}>
-        <View style={[styles.largeMark, { backgroundColor: credential.tone }]}>
-          <Text style={styles.largeMarkText}>{credential.mark}</Text>
-        </View>
-        <Text style={styles.cardType}>{credential.type}</Text>
-        <Text style={styles.detailTitle}>{credential.title}</Text>
-        <Text style={styles.reviewIssuer}>{credential.issuer}</Text>
-        <CredentialInfo credential={credential} />
-        <View style={styles.detailLine}>
-          <Text style={styles.detailLabel}>Detalles</Text>
-          <Text style={styles.detailValue}>{credential.details}</Text>
-        </View>
-      </View>
-      <Button label="Mostrar credencial" onPress={onShow} />
-    </PageContainer>
+    <div
+      className="apple-detail-shell"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      <div className="apple-detail-container">
+        {/* Top Header */}
+        <header className="apple-detail-header">
+          <button
+            className="apple-back-btn"
+            onClick={onBack}
+            aria-label="Volver al tarjetero"
+          >
+            ‹ Volver
+          </button>
+          <span className="apple-detail-title">{credential.title}</span>
+          <div style={{ width: 40 }} />
+        </header>
+
+        {/* QR Code Embedded Container */}
+        <div className="qr-glass-card">
+          <span className="qr-glass-title">
+            Código QR para Verificación Criptográfica
+          </span>
+          <div className="qr-box-white">
+            <QRCode value={`ward:credential:${credential.id}`} size={160} />
+          </div>
+          <div className="valid-status-pill">
+            <span>✓</span>
+            <span>Credencial Verificada y Válida</span>
+          </div>
+        </div>
+
+        {/* Credential Metadata Details */}
+        <div className="meta-details-list">
+          <div className="meta-item">
+            <span className="meta-label">Categoría</span>
+            <span className="meta-val">{credential.type}</span>
+          </div>
+          <div className="meta-item">
+            <span className="meta-label">Emisor</span>
+            <span className="meta-val">{credential.issuer}</span>
+          </div>
+          <div className="meta-item">
+            <span className="meta-label">Entidad reguladora</span>
+            <span className="meta-val">{credential.issuerDetail}</span>
+          </div>
+          <div className="meta-item">
+            <span className="meta-label">Fecha de emisión</span>
+            <span className="meta-val">{credential.issued}</span>
+          </div>
+          <div className="meta-item">
+            <span className="meta-label">Válida hasta</span>
+            <span className="meta-val">{credential.validUntil}</span>
+          </div>
+        </div>
+
+        {/* Swipe Indicators */}
+        {total > 1 && (
+          <div className="wallet-hint" style={{ marginTop: '30px' }}>
+            ↑↓ Deslizá para cambiar de credencial
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  detailCard: {
-    backgroundColor: '#FFFDF8',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#E5DDCF',
-    borderTopWidth: 5,
-    padding: Spacing.four,
-    gap: Spacing.two,
-  },
-  largeMark: {
-    width: 92,
-    height: 92,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.two,
-  },
-  largeMarkText: {
-    color: '#FFFDF8',
-    fontFamily: Fonts.serif,
-    fontSize: 34,
-    fontWeight: '700',
-  },
-  cardType: {
-    color: colors.verified,
-    fontFamily: Fonts.mono,
-    fontSize: 11,
-    letterSpacing: 0.5,
-  },
-  detailTitle: {
-    color: colors.text,
-    fontFamily: Fonts.serif,
-    fontSize: 38,
-  },
-  reviewIssuer: {
-    color: colors.textSecondary,
-    fontFamily: Fonts.sans,
-    fontSize: 15,
-  },
-  detailLine: {
-    borderTopWidth: 1,
-    borderColor: '#DED6C8',
-    paddingTop: Spacing.three,
-    marginTop: Spacing.two,
-    gap: Spacing.one,
-  },
-  detailLabel: {
-    color: colors.verified,
-    fontFamily: Fonts.mono,
-    fontSize: 11,
-    textTransform: 'uppercase',
-  },
-  detailValue: {
-    color: colors.text,
-    fontFamily: Fonts.sans,
-    fontSize: 15,
-    lineHeight: 22,
-  },
-});

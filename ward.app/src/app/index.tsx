@@ -8,7 +8,7 @@ import { useOnboarding } from '@/hooks/use-onboarding';
 import { useCredentials } from '@/hooks/use-credentials';
 
 export default function HomeScreen() {
-  const { step, goToWarning, goToCreating, completeOnboarding, enterDemo } = useOnboarding();
+  const { step, goToWarning, goToCreating, goToAlias, completeOnboarding, enterDemo } = useOnboarding();
   const {
     screen,
     selected,
@@ -18,9 +18,7 @@ export default function HomeScreen() {
     openCredential,
     acceptPending,
     viewPendingDetail,
-    goToPending,
     goToWallet,
-    goToShow,
     goToDetail,
     enableDemoAccepted,
   } = useCredentials();
@@ -30,7 +28,8 @@ export default function HomeScreen() {
       <OnboardingFlow
         step={step}
         onContinue={goToWarning}
-        onConfirm={goToCreating}
+        onConfirm={goToAlias}
+        onCompleteAlias={goToCreating}
         onReady={completeOnboarding}
         onEnterDemo={() => enterDemo(enableDemoAccepted)}
       />
@@ -41,9 +40,16 @@ export default function HomeScreen() {
     case 'pending':
       return <PendingScreen onAccept={acceptPending} onBack={goToWallet} />;
     case 'added':
-      return <AddedScreen onView={viewPendingDetail} onBack={goToWallet} />;
+      return <AddedScreen credential={credentials[0]} onBack={goToWallet} />;
     case 'detail':
-      return <DetailScreen credential={selected} onBack={goToWallet} onShow={goToShow} />;
+      return (
+        <DetailScreen
+          credential={selected}
+          credentials={credentials}
+          onSelectCredential={openCredential}
+          onBack={goToWallet}
+        />
+      );
     case 'show':
       return <ShowScreen credential={selected} onBack={goToDetail} />;
     case 'wallet':
@@ -54,7 +60,7 @@ export default function HomeScreen() {
           credentials={credentials}
           pending={pending}
           onOpen={openCredential}
-          onPending={goToPending}
+          onAcceptPending={acceptPending}
         />
       );
   }

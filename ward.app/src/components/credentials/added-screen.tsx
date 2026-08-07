@@ -1,82 +1,77 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { BackButton } from '@/components/ui/back-button';
-import { Button } from '@/components/ui/button';
-import { PageContainer } from '@/components/ui/page-container';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { QRCode } from "@/components/ui/qr-code";
+import type { Credential } from "@/types/credential";
 
 type AddedScreenProps = {
-  onView: () => void;
+  credential: Credential;
   onBack: () => void;
 };
 
-const colors = Colors.light;
-
-export function AddedScreen({ onView, onBack }: AddedScreenProps) {
+export function AddedScreen({ credential, onBack }: AddedScreenProps) {
   return (
-    <PageContainer>
-      <BackButton onPress={onBack} />
-      <View style={styles.reviewWrap}>
-        <View style={styles.successMark}>
-          <Text style={styles.successText}>✓</Text>
-        </View>
-        <Text style={styles.reviewKicker}>Listo</Text>
-        <Text style={styles.reviewTitle}>Agregada a WARD</Text>
-        <Text style={styles.reviewIssuer}>Tu credencial ya está disponible en tu tarjetero.</Text>
-        <Button label="Ver credencial" onPress={onView} />
-        <Pressable onPress={onBack} style={styles.secondaryButton}>
-          <Text style={styles.secondaryText}>Volver al tarjetero</Text>
-        </Pressable>
-      </View>
-    </PageContainer>
+    <div className="apple-detail-shell">
+      <div className="apple-detail-container">
+        {/* Top Header */}
+        <header className="apple-detail-header">
+          <button
+            className="apple-back-btn"
+            onClick={onBack}
+            aria-label="Volver al tarjetero"
+          >
+            ‹ Volver al tarjetero
+          </button>
+          <div style={{ width: 40 }} />
+        </header>
+
+        {/* Selected Hero Card */}
+        {/* QR Code Embedded Container */}
+        <div className="qr-glass-card">
+          <span className="qr-glass-title">
+            Código QR para Verificación Criptográfica
+          </span>
+          <div className="qr-box-white">
+            <QRCode value={`ward:credential:${credential.id}`} size={160} />
+          </div>
+          <div className="valid-status-pill">
+            <span>✓</span>
+            <span>Credencial Verificada y Válida</span>
+          </div>
+        </div>
+
+        {/* Disclaimer / Success Message */}
+        <div
+          style={{
+            textAlign: "center",
+            padding: "16px 0",
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+          }}
+        >
+          <h2
+            style={{
+              margin: 0,
+              color: "var(--success)",
+              fontSize: "20px",
+              fontFamily: "var(--font-display)",
+              fontWeight: 700,
+            }}
+          >
+            ✓ Agregada Exitosamente
+          </h2>
+          <p
+            style={{
+              margin: 0,
+              color: "var(--text-secondary)",
+              fontSize: "15px",
+              fontFamily: "var(--font-display)",
+              lineHeight: 1.4,
+            }}
+          >
+            Tu credencial {credential.title} ya está disponible. Podés validarla
+            escaneando o acercándola al lector NFC.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  reviewWrap: {
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingVertical: Spacing.five,
-    maxWidth: 500,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  successMark: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
-    backgroundColor: colors.action,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.two,
-  },
-  successText: {
-    color: '#FFFDF8',
-    fontSize: 42,
-  },
-  reviewKicker: {
-    color: colors.verified,
-    fontFamily: Fonts.mono,
-    fontSize: 12,
-    letterSpacing: 0.5,
-  },
-  reviewTitle: {
-    color: colors.text,
-    fontFamily: Fonts.serif,
-    fontSize: 36,
-    textAlign: 'center',
-  },
-  reviewIssuer: {
-    color: colors.textSecondary,
-    fontFamily: Fonts.sans,
-    fontSize: 15,
-    textAlign: 'center',
-  },
-  secondaryButton: {
-    padding: Spacing.two,
-  },
-  secondaryText: {
-    color: colors.textSecondary,
-    fontFamily: Fonts.sans,
-    fontSize: 14,
-  },
-});

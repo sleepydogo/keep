@@ -24,6 +24,7 @@ export function useOnboarding() {
 
   const goToWarning = () => setStep('warning');
   const goToCreating = () => setStep('creating');
+  const goToAlias = () => setStep('alias');
 
   const completeOnboarding = () => {
     storageService.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, 'true');
@@ -31,6 +32,8 @@ export function useOnboarding() {
   };
 
   const enterDemo = (onDemoEntered?: () => void) => {
+    // If skipping to demo, set a default alias so they have one
+    storageService.setItem('ward.user_alias', 'demo.user');
     storageService.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, 'true');
     onDemoEntered?.();
     setStep('wallet');
@@ -40,6 +43,7 @@ export function useOnboarding() {
     step,
     goToWarning,
     goToCreating,
+    goToAlias,
     completeOnboarding,
     enterDemo,
   };

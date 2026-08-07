@@ -1,32 +1,66 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Centralized palette for KEEP / WARD.
+ * Update colors here to re-skin the whole app.
  */
 
 import '@/global.css';
 
 import { Platform } from 'react-native';
 
+export const Palette = {
+  background: '#3D3B30',
+  surface: '#4A473B',
+  surfaceHover: '#565345',
+  primary: '#F2542D',
+  primaryHover: '#FF6B4A',
+  text: '#FFFFFF',
+  textSecondary: '#D9D6CC',
+  textFaint: '#A6A39A',
+  border: '#565345',
+  success: '#4CAF50',
+  warning: '#FFB74D',
+  info: '#4FC3F7',
+  danger: '#E53935',
+};
+
 export const Colors = {
   light: {
-    text: '#1C2431',
-    background: '#F6F1E6',
-    backgroundElement: '#FFFDF8',
-    backgroundSelected: '#E8E0D1',
-    textSecondary: '#68707A',
-    verified: '#B0813A',
-    action: '#2E6B63',
-    reject: '#9B4A3B',
+    text: Palette.text,
+    background: Palette.background,
+    backgroundElement: Palette.surface,
+    backgroundSelected: Palette.surfaceHover,
+    textSecondary: Palette.textSecondary,
+    textFaint: Palette.textFaint,
+    accent: Palette.primary,
+    accentStrong: Palette.primaryHover,
+    success: Palette.success,
+    warning: Palette.warning,
+    info: Palette.info,
+    danger: Palette.danger,
+    action: Palette.primary,
+    verified: Palette.success,
+    reject: Palette.danger,
+    border: Palette.border,
+    onAccent: Palette.text,
   },
   dark: {
-    text: '#F6F1E6',
-    background: '#1C2431',
-    backgroundElement: '#27303D',
-    backgroundSelected: '#354252',
-    textSecondary: '#B9C0C5',
-    verified: '#D1A65C',
-    action: '#5F9B90',
-    reject: '#D17A69',
+    text: Palette.text,
+    background: Palette.background,
+    backgroundElement: Palette.surface,
+    backgroundSelected: Palette.surfaceHover,
+    textSecondary: Palette.textSecondary,
+    textFaint: Palette.textFaint,
+    accent: Palette.primary,
+    accentStrong: Palette.primaryHover,
+    success: Palette.success,
+    warning: Palette.warning,
+    info: Palette.info,
+    danger: Palette.danger,
+    action: Palette.primary,
+    verified: Palette.success,
+    reject: Palette.danger,
+    border: Palette.border,
+    onAccent: Palette.text,
   },
 } as const;
 
@@ -34,13 +68,9 @@ export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
