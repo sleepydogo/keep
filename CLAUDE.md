@@ -8,8 +8,8 @@ No se agrega nada "por las dudas".
 
 ## Alcance
 
-Tres workspaces: `contract/` (Compact), `ward/` (holder + verificador, con toggle
-de rol) y `keep-web/` (plataforma de la institución que emite y firma).
+Tres workspaces: `contract/` (Compact), `ward/` (app Expo del holder + verificador,
+con toggle de rol) y `keep/` (plataforma de la institución que emite y firma).
 Un caso de uso: reprocann, certificacion de portacion de marihuana en argentina regulado por el estado nacional, end-to-end.
 Una ruta de verificación: on-chain.
 El predicado es la vigencia: el límite de 40 g es tope nacional público, no hay

@@ -5,7 +5,7 @@ src/managed/
 !.env.example
 .cursor
 *.db
-keep-web/data/
+keep/data/
 midnight-level-db/
 .wallet-state/
 .expo

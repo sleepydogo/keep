@@ -9,16 +9,17 @@
   "workspaces": [
     "contract",
     "ward",
-    "keep-web"
+    "keep"
   ],
   "scripts": {
     "compact": "npm run compact -w @keep/contract",
     "deploy": "npm run deploy -w @keep/contract",
     "registrar": "npm run registrar -w @keep/contract",
     "presentar": "npm run presentar -w @keep/contract",
-    "dev": "concurrently -n ward,keep-web -c cyan,magenta npm:dev:ward npm:dev:web",
-    "dev:ward": "npm run dev -w @keep/ward",
-    "dev:web": "npm run dev -w @keep/web",
+    "dev": "concurrently -k -i --default-input-target ward -n api,web,ward -c green,magenta,cyan npm:dev:api npm:dev:web npm:dev:ward",
+    "dev:api": "npm run dev:api -w @keep/web",
+    "dev:web": "npm run dev:ui -w @keep/web",
+    "dev:ward": "npm run start -w ward.app -- --port 5173",
     "test": "npm run ci -w @keep/contract"
   },
   "devDependencies": {
@@ -34,8 +35,5 @@
   "allowScripts": {
     "classic-level@3.0.0": true,
     "msgpackr-extract@3.0.4": true
-  },
-  "dependencies": {
-    "expo": "^57.0.11"
   }
 }

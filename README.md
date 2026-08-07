@@ -81,14 +81,14 @@ task dev:server
 ## Correr
 
 ```bash
-npm run dev   # ward en :5173 y keep-web en :5174
+npm run dev   # ward en :5173, keep en :5174, su api en :5175
 ```
 
 ## Comandos
 
 | Comando | Qué hace |
 | --- | --- |
-| `npm run dev` | Levanta las dos apps en paralelo |
+| `npm run dev` | Levanta los tres servicios en paralelo |
 | `npm run compact` | Compila el contrato y regenera `contract/src/managed/` |
 | `npm test` | CI del contrato: compact, typecheck, lint, build, tests |
 
@@ -103,8 +103,8 @@ contract/src/
 ├── keep.compact       # ledger, registrarEmisor, presentarVigencia
 ├── schnorr.compact    # verificación de firma Schnorr sobre Jubjub, en circuito
 └── credencial.ts      # emisor (claves, árbol, firma) + witnesses
-ward/                  # app del ciudadano y del verificador (5173)
-keep-web/              # plataforma de la institución que emite (5174)
+ward/                  # app Expo del ciudadano y del verificador (5173)
+keep/                  # plataforma de la institución que emite (5174, api en 5175)
 ```
 
 ## Red
