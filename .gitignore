@@ -3,3 +3,4 @@ dist/
 src/managed/
 .env*
 !.env.example
+.expo
