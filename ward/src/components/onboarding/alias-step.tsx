@@ -16,7 +16,6 @@ export function AliasStep({ onComplete }: AliasStepProps) {
   const [error, setError] = useState('');
 
   const handleInputChange = (text: string) => {
-    // Only allow lowercase letters (a-z)
     const sanitized = text.toLowerCase().replace(/[^a-z]/g, '');
     setAlias(sanitized);
 
@@ -28,11 +27,10 @@ export function AliasStep({ onComplete }: AliasStepProps) {
   };
 
   const handlePress = () => {
-    if (alias.length >= 3) {
-      const fullAlias = `${alias}.night`;
-      storageService.setItem('ward.user_alias', fullAlias);
-      onComplete(fullAlias);
-    }
+    if (alias.length < 3) return;
+    const fullAlias = `${alias}.night`;
+    storageService.setItem(STORAGE_KEYS.USER_ALIAS, fullAlias);
+    onComplete(fullAlias);
   };
 
   return (
@@ -59,7 +57,7 @@ export function AliasStep({ onComplete }: AliasStepProps) {
         />
         <Text style={styles.suffix}>.night</Text>
       </View>
-      
+
       <Text style={styles.hintText}>Solo letras (a-z), sin espacios ni números.</Text>
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -133,7 +131,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.mono,
     fontSize: 16,
     padding: 0,
-    outlineStyle: 'none', // For web view text input outline removal
+    outlineStyle: 'none',
   } as any,
   hintText: {
     color: '#A6A39A',

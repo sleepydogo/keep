@@ -8,7 +8,15 @@ import { useOnboarding } from '@/hooks/use-onboarding';
 import { useCredentials } from '@/hooks/use-credentials';
 
 export default function HomeScreen() {
-  const { step, goToWarning, goToCreating, goToAlias, completeOnboarding, enterDemo } = useOnboarding();
+  const {
+    step,
+    goToWarning,
+    goToCreating,
+    goToAlias,
+    finishCreating,
+    completeOnboarding,
+    enterDemo,
+  } = useOnboarding();
   const {
     screen,
     selected,
@@ -30,6 +38,7 @@ export default function HomeScreen() {
         onContinue={goToWarning}
         onConfirm={goToAlias}
         onCompleteAlias={goToCreating}
+        onCreatingDone={finishCreating}
         onReady={completeOnboarding}
         onEnterDemo={() => enterDemo(enableDemoAccepted)}
       />
