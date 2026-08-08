@@ -1,42 +1,83 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { getRandomBytes } from 'expo-crypto';
 import { GearIcon } from '@/components/ui/gear-icon';
 import { Button } from '@/components/ui/button';
 import { PageContainer } from '@/components/ui/page-container';
 import { QRCode } from '@/components/ui/qr-code';
 import { EMISORES, type Emisor } from '@/constants/emisores';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { consultar, estaRegistrado, nuevoPedido, type Estado } from '@/services/nodo';
 
 const colors = Colors.light;
+const ESPERA_MS = 60_000;
 
 type Paso = 'elegir' | 'esperando' | 'resultado';
-
-const hex = (b: Uint8Array) =>
-  [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
 
 export function VerifierScreen({ onSettings }: { onSettings: () => void }) {
   const [paso, setPaso] = useState<Paso>('elegir');
   const [emisor, setEmisor] = useState<Emisor>(EMISORES[0]);
+  const [registrado, setRegistrado] = useState<boolean | null>(null);
   const [pedido, setPedido] = useState('');
-  const [vigente, setVigente] = useState(false);
+  const [estado, setEstado] = useState<Estado>('pendiente');
+  const [error, setError] = useState('');
+  const cancelado = useRef(false);
 
-  const pedir = () => {
-    setPedido(
-      JSON.stringify({
-        v: 1,
-        emisorId: emisor.id,
-        nonce: hex(getRandomBytes(32)),
-        fecha: Math.floor(Date.now() / 1000),
-      }),
-    );
-    setPaso('esperando');
+  useEffect(() => {
+    setRegistrado(null);
+    setError('');
+    estaRegistrado(emisor.id)
+      .then((r) => setRegistrado(r.registrado))
+      .catch((e) => setError(e.message));
+  }, [emisor]);
+
+  const pedir = async () => {
+    setError('');
+    try {
+      const p = await nuevoPedido(emisor.id);
+      setPedido(
+        JSON.stringify({
+          v: 1,
+          emisorId: p.emisorId,
+          nonce: p.nonce,
+          fechaConsulta: p.fechaConsulta,
+        }),
+      );
+      setPaso('esperando');
+      cancelado.current = false;
+      esperar(p.presentacionId);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se pudo pedir.');
+    }
   };
 
-  const responder = (ok: boolean) => {
-    setVigente(ok);
-    setPaso('resultado');
+  // La respuesta llega por la cadena, no por el otro teléfono. Timeout es no.
+  const esperar = async (presentacionId: string) => {
+    const hasta = Date.now() + ESPERA_MS;
+    while (Date.now() < hasta && !cancelado.current) {
+      await new Promise((r) => setTimeout(r, 2000));
+      if (cancelado.current) return;
+      try {
+        const { estado: e } = await consultar(presentacionId);
+        if (e !== 'pendiente') {
+          setEstado(e);
+          return setPaso('resultado');
+        }
+      } catch {
+        /* el indexer todavía no lo vio */
+      }
+    }
+    if (!cancelado.current) {
+      setEstado('no-vigente');
+      setPaso('resultado');
+    }
   };
+
+  const cancelar = () => {
+    cancelado.current = true;
+    setPaso('elegir');
+  };
+
+  const vigente = estado === 'vigente';
 
   return (
     <PageContainer>
@@ -45,11 +86,7 @@ export function VerifierScreen({ onSettings }: { onSettings: () => void }) {
           <Text style={styles.brand}>WARD</Text>
           <Text style={styles.rol}>Verificador</Text>
         </View>
-        <Pressable
-          style={styles.icono}
-          onPress={onSettings}
-          accessibilityLabel="Ajustes"
-        >
+        <Pressable style={styles.icono} onPress={onSettings} accessibilityLabel="Ajustes">
           <GearIcon color={colors.text} />
         </Pressable>
       </View>
@@ -79,10 +116,27 @@ export function VerifierScreen({ onSettings }: { onSettings: () => void }) {
               );
             })}
           </View>
-          <View style={styles.chip}>
-            <Text style={styles.chipTexto}>✓ Organismo registrado</Text>
-          </View>
-          <Button label="Pedir verificación" onPress={pedir} />
+
+          <Text
+            style={[
+              styles.chip,
+              { color: registrado === false ? colors.danger : colors.verified },
+            ]}
+          >
+            {registrado === null
+              ? 'Consultando la cadena…'
+              : registrado
+                ? '✓ Organismo registrado on-chain'
+                : '✕ Ese organismo no está registrado'}
+          </Text>
+
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          <Button
+            label="Pedir verificación"
+            disabled={!registrado}
+            onPress={pedir}
+          />
         </>
       )}
 
@@ -94,27 +148,9 @@ export function VerifierScreen({ onSettings }: { onSettings: () => void }) {
           </Text>
           <QRCode value={pedido} size={220} />
           <Text style={styles.esperando}>Esperando respuesta…</Text>
-          <Pressable onPress={() => setPaso('elegir')}>
+          <Pressable onPress={cancelar}>
             <Text style={styles.cancelar}>Cancelar</Text>
           </Pressable>
-
-          <View style={styles.debug}>
-            <Text style={styles.debugTexto}>Sin cadena todavía — simular:</Text>
-            <View style={styles.debugBotones}>
-              <Pressable
-                style={styles.debugBoton}
-                onPress={() => responder(true)}
-              >
-                <Text style={styles.debugBotonTexto}>Vigente</Text>
-              </Pressable>
-              <Pressable
-                style={styles.debugBoton}
-                onPress={() => responder(false)}
-              >
-                <Text style={styles.debugBotonTexto}>No vigente</Text>
-              </Pressable>
-            </View>
-          </View>
         </View>
       )}
 
@@ -134,7 +170,7 @@ export function VerifierScreen({ onSettings }: { onSettings: () => void }) {
           <Text style={styles.ayuda}>
             {vigente
               ? `${emisor.nombre} confirma que el certificado está vigente. No se reveló ningún otro dato.`
-              : `No hay un certificado vigente de ${emisor.nombre} para esta persona.`}
+              : `No hubo respuesta o el certificado de ${emisor.nombre} no está vigente.`}
           </Text>
           <Button label="Nueva verificación" onPress={() => setPaso('elegir')} />
         </View>
@@ -150,12 +186,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   brand: { color: colors.text, fontFamily: Fonts.serif, fontSize: 28, letterSpacing: 2 },
-  rol: {
-    color: colors.accent,
-    fontFamily: Fonts.mono,
-    fontSize: 11,
-    letterSpacing: 1,
-  },
+  rol: { color: colors.accent, fontFamily: Fonts.mono, fontSize: 11, letterSpacing: 1 },
   icono: {
     width: 36,
     height: 36,
@@ -190,17 +221,10 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: Spacing.three,
   },
-  filaActiva: {
-    borderColor: colors.accent,
-    backgroundColor: colors.backgroundSelected,
-  },
+  filaActiva: { borderColor: colors.accent, backgroundColor: colors.backgroundSelected },
   filaTexto: { flex: 1, gap: 2 },
   filaTitulo: { color: colors.text, fontFamily: Fonts.sans, fontSize: 16 },
-  filaDetalle: {
-    color: colors.textSecondary,
-    fontFamily: Fonts.sans,
-    fontSize: 13,
-  },
+  filaDetalle: { color: colors.textSecondary, fontFamily: Fonts.sans, fontSize: 13 },
   radio: {
     width: 20,
     height: 20,
@@ -209,23 +233,10 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   radioActivo: { borderColor: colors.accent, backgroundColor: colors.accent },
-  chip: { alignSelf: 'center' },
-  chipTexto: {
-    color: colors.verified,
-    fontFamily: Fonts.mono,
-    fontSize: 12,
-  },
+  chip: { fontFamily: Fonts.mono, fontSize: 12, textAlign: 'center' },
   centro: { alignItems: 'center', gap: Spacing.three },
-  esperando: {
-    color: colors.textSecondary,
-    fontFamily: Fonts.mono,
-    fontSize: 13,
-  },
-  cancelar: {
-    color: colors.textFaint,
-    fontFamily: Fonts.sans,
-    fontSize: 14,
-  },
+  esperando: { color: colors.textSecondary, fontFamily: Fonts.mono, fontSize: 13 },
+  cancelar: { color: colors.textFaint, fontFamily: Fonts.sans, fontSize: 14 },
   sello: {
     width: 96,
     height: 96,
@@ -233,32 +244,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  selloMarca: { color: '#FFFFFF', fontSize: 46 },
-  debug: {
-    alignSelf: 'stretch',
-    borderTopWidth: 1,
-    borderColor: colors.border,
-    paddingTop: Spacing.three,
-    gap: Spacing.two,
-    marginTop: Spacing.three,
-  },
-  debugTexto: {
-    color: colors.textFaint,
-    fontFamily: Fonts.mono,
-    fontSize: 11,
-  },
-  debugBotones: { flexDirection: 'row', gap: Spacing.two },
-  debugBoton: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    paddingVertical: Spacing.two,
-    alignItems: 'center',
-  },
-  debugBotonTexto: {
-    color: colors.textSecondary,
-    fontFamily: Fonts.sans,
-    fontSize: 13,
-  },
+  selloMarca: { color: colors.onAccent, fontSize: 46 },
+  error: { color: colors.danger, fontFamily: Fonts.sans, fontSize: 13, textAlign: 'center' },
 });

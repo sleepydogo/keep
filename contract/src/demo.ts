@@ -62,7 +62,7 @@ for (const [id] of estado().emisores)
 titulo("3. El emisor emite la credencial (off-chain)");
 const holderSecret = bytesAleatorios(32);
 const vence = ahora + 90n * DIA;
-const credencial = emitir(emisor.sk, holderSecret, vence, [
+const credencial = emitir(emisor.sk, pureCircuits.holderIdPublico(holderSecret), vence, [
   111n, // patología
   222n, // médico
   333n, // domicilio de cultivo
@@ -115,7 +115,7 @@ console.log("¿vigente?", estado().verificaciones.lookup(idPresentacion));
 // 7. El mismo flujo con un certificado vencido.
 titulo("7. Otro ciudadano, certificado vencido");
 const holderSecret2 = bytesAleatorios(32);
-const credencial2 = emitir(emisor.sk, holderSecret2, ahora - 10n * DIA, [444n]);
+const credencial2 = emitir(emisor.sk, pureCircuits.holderIdPublico(holderSecret2), ahora - 10n * DIA, [444n]);
 const nonce2 = bytesAleatorios(32);
 ctx.currentPrivateState = {
   holderSecret: holderSecret2,
