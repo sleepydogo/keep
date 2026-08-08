@@ -44,15 +44,28 @@ const idb = async <T>(
  * Identidad del emisor: un solo secreto guardado. El emisorId y la clave de
  * firma se derivan de él, así que reiniciar el navegador no los cambia.
  */
+const secretDesdeStore = (v: unknown): string | undefined => {
+  if (typeof v === "string" && /^[0-9a-f]+$/i.test(v)) return v;
+  // Formato viejo: { emisorSecret, sk, pk, ... }
+  if (v && typeof v === "object" && "emisorSecret" in v) {
+    const s = (v as { emisorSecret: unknown }).emisorSecret;
+    if (typeof s === "string" && /^[0-9a-f]+$/i.test(s)) return s;
+  }
+  return undefined;
+};
+
 export const ensureDeviceKey = async (
   userId: string,
   register: (emisor: EmisorJubjub) => Promise<void>,
 ): Promise<EmisorJubjub> => {
   const clave = `user:${userId}`;
-  let hex = await idb<string | undefined>("readonly", (s) => s.get(clave));
+  const raw = await idb<unknown>("readonly", (s) => s.get(clave));
+  let hex = secretDesdeStore(raw);
 
   if (!hex) {
     hex = toHex(crypto.getRandomValues(new Uint8Array(32)));
+    await idb("readwrite", (s) => s.put(hex, clave));
+  } else if (typeof raw !== "string") {
     await idb("readwrite", (s) => s.put(hex, clave));
   }
 

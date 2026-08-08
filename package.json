@@ -11,6 +11,7 @@
     "keep"
   ],
   "scripts": {
+    "postinstall": "npm install --prefix ward",
     "compact": "npm run compact -w @keep/contract",
     "deploy": "npm run deploy -w @keep/contract",
     "registrar": "npm run registrar -w @keep/contract",
@@ -18,7 +19,8 @@
     "dev": "concurrently -k -i --default-input-target ward -n api,web,ward -c green,magenta,cyan npm:dev:api npm:dev:web npm:dev:ward",
     "dev:api": "npm run dev:api -w @keep/web",
     "dev:web": "npm run dev:ui -w @keep/web",
-    "dev:ward": "npm run --prefix ward start -- --port 5173",
+    "dev:ward": "npm run --prefix ward start -- --go",
+    "dev:ward:web": "npm run --prefix ward start -- --web --port 5173",
     "test": "npm run ci -w @keep/contract"
   },
   "devDependencies": {
