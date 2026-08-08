@@ -19,7 +19,7 @@ const holderSecret = bytesAleatorios(32);
 const ahora = BigInt(Math.floor(Date.now() / 1000));
 const credencial = emitir(
   clavesEmisor(emisorSecret).sk,
-  holderSecret,
+  pureCircuits.holderIdPublico(holderSecret),
   ahora + 90n * DIA,
   [111n, 222n, 333n],
 );

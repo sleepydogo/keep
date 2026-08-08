@@ -29,7 +29,7 @@ const escenario = (fechaVencimiento: bigint, skDeLaFirma?: bigint) => {
   const holderSecret = bytesAleatorios(32);
   const credencial = emitir(
     skDeLaFirma ?? emisor.sk,
-    holderSecret,
+    pureCircuits.holderIdPublico(holderSecret),
     fechaVencimiento,
     [1n, 2n, 3n],
   );

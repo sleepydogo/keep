@@ -49,8 +49,13 @@ export pure circuit hojaVencimiento(fechaVencimiento: Uint<64>): Field {
     return transientHash<[Bytes<10>, Field]>(["keep:vence", fechaVencimiento as Field]);
 }
 
+// SHA-256, para que WARD pueda calcularlo sin el WASM de Midnight.
+export pure circuit holderIdPublico(holderSecret: Bytes<32>): Bytes<32> {
+    return persistentHash<[Bytes<11>, Bytes<32>]>(["keep:holder", holderSecret]);
+}
+
 export pure circuit holderId(holderSecret: Bytes<32>): Field {
-    return transientHash<[Bytes<11>, Bytes<32>]>(["keep:holder", holderSecret]);
+    return degradeToTransient(holderIdPublico(holderSecret));
 }
 
 export pure circuit schnorrChallenge(

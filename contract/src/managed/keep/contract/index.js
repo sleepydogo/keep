@@ -9,9 +9,9 @@ const _descriptor_2 = new __compactRuntime.CompactTypeVector(2, _descriptor_1);
 
 const _descriptor_3 = new __compactRuntime.CompactTypeUnsignedInteger(18446744073709551615n, 8);
 
-const _descriptor_4 = __compactRuntime.CompactTypeJubjubPoint;
+const _descriptor_4 = __compactRuntime.CompactTypeBoolean;
 
-const _descriptor_5 = __compactRuntime.CompactTypeBoolean;
+const _descriptor_5 = __compactRuntime.CompactTypeJubjubPoint;
 
 class _MerkleTreeDigest_0 {
   alignment() {
@@ -31,16 +31,16 @@ const _descriptor_6 = new _MerkleTreeDigest_0();
 
 class _MerkleTreePathEntry_0 {
   alignment() {
-    return _descriptor_6.alignment().concat(_descriptor_5.alignment());
+    return _descriptor_6.alignment().concat(_descriptor_4.alignment());
   }
   fromValue(value_0) {
     return {
       sibling: _descriptor_6.fromValue(value_0),
-      goes_left: _descriptor_5.fromValue(value_0)
+      goes_left: _descriptor_4.fromValue(value_0)
     }
   }
   toValue(value_0) {
-    return _descriptor_6.toValue(value_0.sibling).concat(_descriptor_5.toValue(value_0.goes_left));
+    return _descriptor_6.toValue(value_0.sibling).concat(_descriptor_4.toValue(value_0.goes_left));
   }
 }
 
@@ -67,16 +67,16 @@ const _descriptor_9 = new _MerkleTreePath_0();
 
 class _SchnorrSignature_0 {
   alignment() {
-    return _descriptor_4.alignment().concat(_descriptor_1.alignment());
+    return _descriptor_5.alignment().concat(_descriptor_1.alignment());
   }
   fromValue(value_0) {
     return {
-      announcement: _descriptor_4.fromValue(value_0),
+      announcement: _descriptor_5.fromValue(value_0),
       response: _descriptor_1.fromValue(value_0)
     }
   }
   toValue(value_0) {
-    return _descriptor_4.toValue(value_0.announcement).concat(_descriptor_1.toValue(value_0.response));
+    return _descriptor_5.toValue(value_0.announcement).concat(_descriptor_1.toValue(value_0.response));
   }
 }
 
@@ -120,7 +120,7 @@ class _tuple_1 {
 
 const _descriptor_13 = new _tuple_1();
 
-const _descriptor_14 = new __compactRuntime.CompactTypeBytes(11);
+const _descriptor_14 = new __compactRuntime.CompactTypeBytes(16);
 
 class _tuple_2 {
   alignment() {
@@ -139,44 +139,82 @@ class _tuple_2 {
 
 const _descriptor_15 = new _tuple_2();
 
-const _descriptor_16 = new __compactRuntime.CompactTypeBytes(12);
+const _descriptor_16 = new __compactRuntime.CompactTypeBytes(11);
 
 class _tuple_3 {
   alignment() {
-    return _descriptor_16.alignment().concat(_descriptor_0.alignment().concat(_descriptor_3.alignment()));
+    return _descriptor_16.alignment().concat(_descriptor_0.alignment());
   }
   fromValue(value_0) {
     return [
       _descriptor_16.fromValue(value_0),
-      _descriptor_0.fromValue(value_0),
-      _descriptor_3.fromValue(value_0)
+      _descriptor_0.fromValue(value_0)
     ]
   }
   toValue(value_0) {
-    return _descriptor_16.toValue(value_0[0]).concat(_descriptor_0.toValue(value_0[1]).concat(_descriptor_3.toValue(value_0[2])));
+    return _descriptor_16.toValue(value_0[0]).concat(_descriptor_0.toValue(value_0[1]));
   }
 }
 
 const _descriptor_17 = new _tuple_3();
 
-const _descriptor_18 = new __compactRuntime.CompactTypeBytes(16);
+const _descriptor_18 = new __compactRuntime.CompactTypeBytes(6);
 
-class _tuple_4 {
+class _LeafPreimage_0 {
   alignment() {
-    return _descriptor_18.alignment().concat(_descriptor_0.alignment());
+    return _descriptor_18.alignment().concat(_descriptor_1.alignment());
   }
   fromValue(value_0) {
-    return [
-      _descriptor_18.fromValue(value_0),
-      _descriptor_0.fromValue(value_0)
-    ]
+    return {
+      domain_sep: _descriptor_18.fromValue(value_0),
+      data: _descriptor_1.fromValue(value_0)
+    }
   }
   toValue(value_0) {
-    return _descriptor_18.toValue(value_0[0]).concat(_descriptor_0.toValue(value_0[1]));
+    return _descriptor_18.toValue(value_0.domain_sep).concat(_descriptor_1.toValue(value_0.data));
   }
 }
 
-const _descriptor_19 = new _tuple_4();
+const _descriptor_19 = new _LeafPreimage_0();
+
+const _descriptor_20 = new __compactRuntime.CompactTypeBytes(12);
+
+class _tuple_4 {
+  alignment() {
+    return _descriptor_20.alignment().concat(_descriptor_0.alignment().concat(_descriptor_3.alignment()));
+  }
+  fromValue(value_0) {
+    return [
+      _descriptor_20.fromValue(value_0),
+      _descriptor_0.fromValue(value_0),
+      _descriptor_3.fromValue(value_0)
+    ]
+  }
+  toValue(value_0) {
+    return _descriptor_20.toValue(value_0[0]).concat(_descriptor_0.toValue(value_0[1]).concat(_descriptor_3.toValue(value_0[2])));
+  }
+}
+
+const _descriptor_21 = new _tuple_4();
+
+const _descriptor_22 = new __compactRuntime.CompactTypeBytes(10);
+
+class _tuple_5 {
+  alignment() {
+    return _descriptor_22.alignment().concat(_descriptor_1.alignment());
+  }
+  fromValue(value_0) {
+    return [
+      _descriptor_22.fromValue(value_0),
+      _descriptor_1.fromValue(value_0)
+    ]
+  }
+  toValue(value_0) {
+    return _descriptor_22.toValue(value_0[0]).concat(_descriptor_1.toValue(value_0[1]));
+  }
+}
+
+const _descriptor_23 = new _tuple_5();
 
 class _SchnorrHashInput_0 {
   alignment() {
@@ -196,59 +234,21 @@ class _SchnorrHashInput_0 {
   }
 }
 
-const _descriptor_20 = new _SchnorrHashInput_0();
-
-const _descriptor_21 = new __compactRuntime.CompactTypeBytes(6);
-
-class _LeafPreimage_0 {
-  alignment() {
-    return _descriptor_21.alignment().concat(_descriptor_1.alignment());
-  }
-  fromValue(value_0) {
-    return {
-      domain_sep: _descriptor_21.fromValue(value_0),
-      data: _descriptor_1.fromValue(value_0)
-    }
-  }
-  toValue(value_0) {
-    return _descriptor_21.toValue(value_0.domain_sep).concat(_descriptor_1.toValue(value_0.data));
-  }
-}
-
-const _descriptor_22 = new _LeafPreimage_0();
-
-const _descriptor_23 = new __compactRuntime.CompactTypeBytes(10);
-
-class _tuple_5 {
-  alignment() {
-    return _descriptor_23.alignment().concat(_descriptor_1.alignment());
-  }
-  fromValue(value_0) {
-    return [
-      _descriptor_23.fromValue(value_0),
-      _descriptor_1.fromValue(value_0)
-    ]
-  }
-  toValue(value_0) {
-    return _descriptor_23.toValue(value_0[0]).concat(_descriptor_1.toValue(value_0[1]));
-  }
-}
-
-const _descriptor_24 = new _tuple_5();
+const _descriptor_24 = new _SchnorrHashInput_0();
 
 class _Either_0 {
   alignment() {
-    return _descriptor_5.alignment().concat(_descriptor_0.alignment().concat(_descriptor_0.alignment()));
+    return _descriptor_4.alignment().concat(_descriptor_0.alignment().concat(_descriptor_0.alignment()));
   }
   fromValue(value_0) {
     return {
-      is_left: _descriptor_5.fromValue(value_0),
+      is_left: _descriptor_4.fromValue(value_0),
       left: _descriptor_0.fromValue(value_0),
       right: _descriptor_0.fromValue(value_0)
     }
   }
   toValue(value_0) {
-    return _descriptor_5.toValue(value_0.is_left).concat(_descriptor_0.toValue(value_0.left).concat(_descriptor_0.toValue(value_0.right)));
+    return _descriptor_4.toValue(value_0.is_left).concat(_descriptor_0.toValue(value_0.left).concat(_descriptor_0.toValue(value_0.right)));
   }
 }
 
@@ -311,8 +311,8 @@ export class Contract {
         const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
         const partialProofData = {
           input: {
-            value: _descriptor_4.toValue(pk_0),
-            alignment: _descriptor_4.alignment()
+            value: _descriptor_5.toValue(pk_0),
+            alignment: _descriptor_5.alignment()
           },
           output: undefined,
           publicTranscript: [],
@@ -387,6 +387,9 @@ export class Contract {
       },
       hojaVencimiento(context, ...args_1) {
         return { result: pureCircuits.hojaVencimiento(...args_1), context };
+      },
+      holderIdPublico(context, ...args_1) {
+        return { result: pureCircuits.holderIdPublico(...args_1), context };
       },
       holderId(context, ...args_1) {
         return { result: pureCircuits.holderId(...args_1), context };
@@ -486,31 +489,27 @@ export class Contract {
     return result_0;
   }
   _transientHash_1(value_0) {
-    const result_0 = __compactRuntime.transientHash(_descriptor_24, value_0);
+    const result_0 = __compactRuntime.transientHash(_descriptor_23, value_0);
     return result_0;
   }
   _transientHash_2(value_0) {
-    const result_0 = __compactRuntime.transientHash(_descriptor_15, value_0);
-    return result_0;
-  }
-  _transientHash_3(value_0) {
-    const result_0 = __compactRuntime.transientHash(_descriptor_20, value_0);
+    const result_0 = __compactRuntime.transientHash(_descriptor_24, value_0);
     return result_0;
   }
   _persistentHash_0(value_0) {
-    const result_0 = __compactRuntime.persistentHash(_descriptor_22, value_0);
-    return result_0;
-  }
-  _persistentHash_1(value_0) {
-    const result_0 = __compactRuntime.persistentHash(_descriptor_17, value_0);
-    return result_0;
-  }
-  _persistentHash_2(value_0) {
     const result_0 = __compactRuntime.persistentHash(_descriptor_19, value_0);
     return result_0;
   }
-  _persistentHash_3(value_0) {
+  _persistentHash_1(value_0) {
+    const result_0 = __compactRuntime.persistentHash(_descriptor_21, value_0);
+    return result_0;
+  }
+  _persistentHash_2(value_0) {
     const result_0 = __compactRuntime.persistentHash(_descriptor_15, value_0);
+    return result_0;
+  }
+  _persistentHash_3(value_0) {
+    const result_0 = __compactRuntime.persistentHash(_descriptor_17, value_0);
     return result_0;
   }
   _degradeToTransient_0(x_0) {
@@ -559,7 +558,7 @@ export class Contract {
     const __compact_pattern_tmp2_0 = signature_0;
     const announcement_0 = __compact_pattern_tmp2_0.announcement;
     const response_0 = __compact_pattern_tmp2_0.response;
-    const cFull_0 = this._transientHash_3({ ann_x:
+    const cFull_0 = this._transientHash_2({ ann_x:
                                               this._jubjubPointX_0(announcement_0),
                                             ann_y:
                                               this._jubjubPointY_0(announcement_0),
@@ -592,7 +591,7 @@ export class Contract {
     return [];
   }
   _schnorrChallenge_0(ann_x_0, ann_y_0, pk_x_0, pk_y_0, msg_0) {
-    return this._transientHash_3({ ann_x: ann_x_0,
+    return this._transientHash_2({ ann_x: ann_x_0,
                                    ann_y: ann_y_0,
                                    pk_x: pk_x_0,
                                    pk_y: pk_y_0,
@@ -635,7 +634,7 @@ export class Contract {
   _registrarEmisor_0(context, partialProofData, pk_0) {
     const id_0 = this._derivarEmisorId_0(this._emisorSecret_0(context,
                                                               partialProofData));
-    __compactRuntime.assert(!_descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
+    __compactRuntime.assert(!_descriptor_4.fromValue(__compactRuntime.queryLedgerState(context,
                                                                                        partialProofData,
                                                                                        [
                                                                                         { dup: { n: 0 } },
@@ -665,8 +664,8 @@ export class Contract {
                                                  value: __compactRuntime.StateValue.newCell({ value: _descriptor_0.toValue(id_0),
                                                                                               alignment: _descriptor_0.alignment() }).encode() } },
                                        { push: { storage: true,
-                                                 value: __compactRuntime.StateValue.newCell({ value: _descriptor_4.toValue(pk_0),
-                                                                                              alignment: _descriptor_4.alignment() }).encode() } },
+                                                 value: __compactRuntime.StateValue.newCell({ value: _descriptor_5.toValue(pk_0),
+                                                                                              alignment: _descriptor_5.alignment() }).encode() } },
                                        { ins: { cached: false, n: 1 } },
                                        { ins: { cached: true, n: 1 } }]);
     return [];
@@ -678,7 +677,7 @@ export class Contract {
                        fechaConsulta_0)
   {
     const id_0 = this._presentacionId_0(nonce_0, fechaConsulta_0);
-    __compactRuntime.assert(!_descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
+    __compactRuntime.assert(!_descriptor_4.fromValue(__compactRuntime.queryLedgerState(context,
                                                                                        partialProofData,
                                                                                        [
                                                                                         { dup: { n: 0 } },
@@ -695,7 +694,7 @@ export class Contract {
                                                                                         { popeq: { cached: true,
                                                                                                    result: undefined } }]).value),
                             'Presentacion ya usada');
-    __compactRuntime.assert(_descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
+    __compactRuntime.assert(_descriptor_4.fromValue(__compactRuntime.queryLedgerState(context,
                                                                                       partialProofData,
                                                                                       [
                                                                                        { dup: { n: 0 } },
@@ -727,7 +726,7 @@ export class Contract {
                           partialProofData,
                           [this._holderId_0(holderSecret_0), raiz_0],
                           firma_0,
-                          _descriptor_4.fromValue(__compactRuntime.queryLedgerState(context,
+                          _descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
                                                                                     partialProofData,
                                                                                     [
                                                                                      { dup: { n: 0 } },
@@ -759,8 +758,8 @@ export class Contract {
                                                  value: __compactRuntime.StateValue.newCell({ value: _descriptor_0.toValue(id_0),
                                                                                               alignment: _descriptor_0.alignment() }).encode() } },
                                        { push: { storage: true,
-                                                 value: __compactRuntime.StateValue.newCell({ value: _descriptor_5.toValue(tmp_0),
-                                                                                              alignment: _descriptor_5.alignment() }).encode() } },
+                                                 value: __compactRuntime.StateValue.newCell({ value: _descriptor_4.toValue(tmp_0),
+                                                                                              alignment: _descriptor_4.alignment() }).encode() } },
                                        { ins: { cached: false, n: 1 } },
                                        { ins: { cached: true, n: 1 } }]);
     return [];
@@ -782,9 +781,12 @@ export class Contract {
     return this._transientHash_1([new Uint8Array([107, 101, 101, 112, 58, 118, 101, 110, 99, 101]),
                                   fechaVencimiento_0]);
   }
+  _holderIdPublico_0(holderSecret_0) {
+    return this._persistentHash_3([new Uint8Array([107, 101, 101, 112, 58, 104, 111, 108, 100, 101, 114]),
+                                   holderSecret_0]);
+  }
   _holderId_0(holderSecret_0) {
-    return this._transientHash_2([new Uint8Array([107, 101, 101, 112, 58, 104, 111, 108, 100, 101, 114]),
-                                  holderSecret_0]);
+    return this._degradeToTransient_0(this._holderIdPublico_0(holderSecret_0));
   }
   _schnorrChallenge_1(ann_x_0, ann_y_0, pk_x_0, pk_y_0, msg_0) {
     return this._schnorrChallenge_0(ann_x_0, ann_y_0, pk_x_0, pk_y_0, msg_0);
@@ -813,7 +815,7 @@ export function ledger(stateOrChargedState) {
         if (args_0.length !== 0) {
           throw new __compactRuntime.CompactError(`isEmpty: expected 0 arguments, received ${args_0.length}`);
         }
-        return _descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
+        return _descriptor_4.fromValue(__compactRuntime.queryLedgerState(context,
                                                                          partialProofData,
                                                                          [
                                                                           { dup: { n: 0 } },
@@ -861,7 +863,7 @@ export function ledger(stateOrChargedState) {
                                      'Bytes<32>',
                                      key_0)
         }
-        return _descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
+        return _descriptor_4.fromValue(__compactRuntime.queryLedgerState(context,
                                                                          partialProofData,
                                                                          [
                                                                           { dup: { n: 0 } },
@@ -890,7 +892,7 @@ export function ledger(stateOrChargedState) {
                                      'Bytes<32>',
                                      key_0)
         }
-        return _descriptor_4.fromValue(__compactRuntime.queryLedgerState(context,
+        return _descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
                                                                          partialProofData,
                                                                          [
                                                                           { dup: { n: 0 } },
@@ -914,7 +916,7 @@ export function ledger(stateOrChargedState) {
           throw new __compactRuntime.CompactError(`iter: expected 0 arguments, received ${args_0.length}`);
         }
         const self_0 = state.asArray()[0];
-        return self_0.asMap().keys().map(  (key) => {    const value = self_0.asMap().get(key).asCell();    return [      _descriptor_0.fromValue(key.value),      _descriptor_4.fromValue(value.value)    ];  })[Symbol.iterator]();
+        return self_0.asMap().keys().map(  (key) => {    const value = self_0.asMap().get(key).asCell();    return [      _descriptor_0.fromValue(key.value),      _descriptor_5.fromValue(value.value)    ];  })[Symbol.iterator]();
       }
     },
     verificaciones: {
@@ -922,7 +924,7 @@ export function ledger(stateOrChargedState) {
         if (args_0.length !== 0) {
           throw new __compactRuntime.CompactError(`isEmpty: expected 0 arguments, received ${args_0.length}`);
         }
-        return _descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
+        return _descriptor_4.fromValue(__compactRuntime.queryLedgerState(context,
                                                                          partialProofData,
                                                                          [
                                                                           { dup: { n: 0 } },
@@ -970,7 +972,7 @@ export function ledger(stateOrChargedState) {
                                      'Bytes<32>',
                                      key_0)
         }
-        return _descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
+        return _descriptor_4.fromValue(__compactRuntime.queryLedgerState(context,
                                                                          partialProofData,
                                                                          [
                                                                           { dup: { n: 0 } },
@@ -999,7 +1001,7 @@ export function ledger(stateOrChargedState) {
                                      'Bytes<32>',
                                      key_0)
         }
-        return _descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
+        return _descriptor_4.fromValue(__compactRuntime.queryLedgerState(context,
                                                                          partialProofData,
                                                                          [
                                                                           { dup: { n: 0 } },
@@ -1023,7 +1025,7 @@ export function ledger(stateOrChargedState) {
           throw new __compactRuntime.CompactError(`iter: expected 0 arguments, received ${args_0.length}`);
         }
         const self_0 = state.asArray()[1];
-        return self_0.asMap().keys().map(  (key) => {    const value = self_0.asMap().get(key).asCell();    return [      _descriptor_0.fromValue(key.value),      _descriptor_5.fromValue(value.value)    ];  })[Symbol.iterator]();
+        return self_0.asMap().keys().map(  (key) => {    const value = self_0.asMap().get(key).asCell();    return [      _descriptor_0.fromValue(key.value),      _descriptor_4.fromValue(value.value)    ];  })[Symbol.iterator]();
       }
     }
   };
@@ -1101,6 +1103,20 @@ export const pureCircuits = {
     }
     return _dummyContract._hojaVencimiento_0(fechaVencimiento_0);
   },
+  holderIdPublico: (...args_0) => {
+    if (args_0.length !== 1) {
+      throw new __compactRuntime.CompactError(`holderIdPublico: expected 1 argument (as invoked from Typescript), received ${args_0.length}`);
+    }
+    const holderSecret_0 = args_0[0];
+    if (!(holderSecret_0.buffer instanceof ArrayBuffer && holderSecret_0.BYTES_PER_ELEMENT === 1 && holderSecret_0.length === 32)) {
+      __compactRuntime.typeError('holderIdPublico',
+                                 'argument 1',
+                                 'keep.compact line 53 char 1',
+                                 'Bytes<32>',
+                                 holderSecret_0)
+    }
+    return _dummyContract._holderIdPublico_0(holderSecret_0);
+  },
   holderId: (...args_0) => {
     if (args_0.length !== 1) {
       throw new __compactRuntime.CompactError(`holderId: expected 1 argument (as invoked from Typescript), received ${args_0.length}`);
@@ -1109,7 +1125,7 @@ export const pureCircuits = {
     if (!(holderSecret_0.buffer instanceof ArrayBuffer && holderSecret_0.BYTES_PER_ELEMENT === 1 && holderSecret_0.length === 32)) {
       __compactRuntime.typeError('holderId',
                                  'argument 1',
-                                 'keep.compact line 52 char 1',
+                                 'keep.compact line 57 char 1',
                                  'Bytes<32>',
                                  holderSecret_0)
     }
@@ -1127,35 +1143,35 @@ export const pureCircuits = {
     if (!(typeof(ann_x_0) === 'bigint' && ann_x_0 >= 0 && ann_x_0 <= __compactRuntime.MAX_FIELD)) {
       __compactRuntime.typeError('schnorrChallenge',
                                  'argument 1',
-                                 'keep.compact line 56 char 1',
+                                 'keep.compact line 61 char 1',
                                  'Field',
                                  ann_x_0)
     }
     if (!(typeof(ann_y_0) === 'bigint' && ann_y_0 >= 0 && ann_y_0 <= __compactRuntime.MAX_FIELD)) {
       __compactRuntime.typeError('schnorrChallenge',
                                  'argument 2',
-                                 'keep.compact line 56 char 1',
+                                 'keep.compact line 61 char 1',
                                  'Field',
                                  ann_y_0)
     }
     if (!(typeof(pk_x_0) === 'bigint' && pk_x_0 >= 0 && pk_x_0 <= __compactRuntime.MAX_FIELD)) {
       __compactRuntime.typeError('schnorrChallenge',
                                  'argument 3',
-                                 'keep.compact line 56 char 1',
+                                 'keep.compact line 61 char 1',
                                  'Field',
                                  pk_x_0)
     }
     if (!(typeof(pk_y_0) === 'bigint' && pk_y_0 >= 0 && pk_y_0 <= __compactRuntime.MAX_FIELD)) {
       __compactRuntime.typeError('schnorrChallenge',
                                  'argument 4',
-                                 'keep.compact line 56 char 1',
+                                 'keep.compact line 61 char 1',
                                  'Field',
                                  pk_y_0)
     }
     if (!(Array.isArray(msg_0) && msg_0.length === 2 && msg_0.every((t) => typeof(t) === 'bigint' && t >= 0 && t <= __compactRuntime.MAX_FIELD))) {
       __compactRuntime.typeError('schnorrChallenge',
                                  'argument 5',
-                                 'keep.compact line 56 char 1',
+                                 'keep.compact line 61 char 1',
                                  'Vector<2, Field>',
                                  msg_0)
     }
