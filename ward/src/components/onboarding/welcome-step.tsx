@@ -20,7 +20,7 @@ export function WelcomeStep({ onContinue }: WelcomeStepProps) {
         <View style={styles.heroMark}>
           <Text style={styles.heroMarkText}>W</Text>
         </View>
-        <Text style={styles.onboardingTitle}>Tu tarjetero personal</Text>
+        <Text style={styles.onboardingTitle}>Tus credenciales, con vos</Text>
         <Text style={styles.onboardingBody}>
           Guardá tus credenciales importantes en un solo lugar.
         </Text>

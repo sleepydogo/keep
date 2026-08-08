@@ -1,8 +1,10 @@
 import '../global.css';
-import { DefaultTheme, ThemeProvider, Stack } from 'expo-router';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { Palette } from '@/constants/theme';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { LockGate } from '@/components/lock-gate';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,12 +22,14 @@ const WardTheme = {
 export default function RootLayout() {
   return (
     <ThemeProvider value={WardTheme}>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: Palette.background },
-        }}
-      />
+      <LockGate>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: Palette.background },
+          }}
+        />
+      </LockGate>
       <AnimatedSplashOverlay />
     </ThemeProvider>
   );

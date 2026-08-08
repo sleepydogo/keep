@@ -1,53 +1,35 @@
-import { useState } from 'react';
-import { credentials as initialCredentials, pendingCredential } from '@/constants/mock-data';
+import { useCallback, useEffect, useState } from 'react';
+import { aCredential, listar } from '@/services/credenciales';
 import type { Credential, Screen } from '@/types/credential';
 
 export function useCredentials() {
   const [screen, setScreen] = useState<Screen>('wallet');
-  const [selected, setSelected] = useState<Credential>(initialCredentials[0]);
-  const [accepted, setAccepted] = useState(false);
+  const [credentials, setCredentials] = useState<Credential[]>([]);
+  const [selected, setSelected] = useState<Credential | null>(null);
 
-  const walletCredentials = accepted
-    ? [pendingCredential, ...initialCredentials]
-    : initialCredentials;
+  const recargar = useCallback(() => {
+    listar().then((cs) => setCredentials(cs.map(aCredential)));
+  }, []);
+
+  useEffect(recargar, [recargar]);
 
   const openCredential = (credential: Credential) => {
     setSelected(credential);
     setScreen('detail');
   };
 
-  const acceptPending = () => {
-    setAccepted(true);
-    setScreen('added');
-  };
-
-  const viewPendingDetail = () => {
-    setSelected(pendingCredential);
-    setScreen('detail');
-  };
-
-  const goToPending = () => setScreen('pending');
-  const goToWallet = () => setScreen('wallet');
-  const goToShow = () => setScreen('show');
-  const goToDetail = () => setScreen('detail');
-
-  const enableDemoAccepted = () => {
-    setAccepted(true);
-  };
-
   return {
     screen,
     selected,
-    accepted,
-    pending: accepted ? undefined : pendingCredential,
-    credentials: walletCredentials,
+    credentials,
     openCredential,
-    acceptPending,
-    viewPendingDetail,
-    goToPending,
-    goToWallet,
-    goToShow,
-    goToDetail,
-    enableDemoAccepted,
+    goToWallet: () => {
+      recargar();
+      setScreen('wallet');
+    },
+    goToShow: () => setScreen('show'),
+    goToId: () => setScreen('id'),
+    goToSettings: () => setScreen('settings'),
+    goToDetail: () => setScreen('detail'),
   };
 }

@@ -3,20 +3,21 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { AppleWalletCard } from '@/components/credentials/apple-wallet-card';
 import { useCredentialOrder } from '@/hooks/use-credential-order';
 import { useCardCustomisation } from '@/hooks/use-card-customisation';
+import { GearIcon } from '@/components/ui/gear-icon';
 import type { Credential } from '@/types/credential';
 
 type WalletScreenProps = {
   credentials: Credential[];
-  pending?: Credential;
   onOpen: (credential: Credential) => void;
-  onAcceptPending?: () => void;
+  onShowId: () => void;
+  onSettings: () => void;
 };
 
 export function WalletScreen({
   credentials,
-  pending,
   onOpen,
-  onAcceptPending,
+  onShowId,
+  onSettings,
 }: WalletScreenProps) {
   const reduceMotion = useReducedMotion();
   const { items, draggingId } = useCredentialOrder(credentials);
@@ -42,6 +43,22 @@ export function WalletScreen({
         </div>
         <div className="wallet-header-actions">
           <span className="wallet-alias">@{alias}</span>
+          <button
+            className="header-icon-btn"
+            onClick={onSettings}
+            aria-label="Ajustes"
+            title="Ajustes"
+          >
+            <GearIcon color="currentColor" />
+          </button>
+          <button
+            className="header-icon-btn"
+            onClick={onShowId}
+            aria-label="Mostrar mi código para recibir credenciales"
+            title="Mi código para recibir credenciales"
+          >
+            +
+          </button>
           {/* Eye — toggle privacy mask */}
           <button
             className="header-icon-btn"
@@ -66,34 +83,17 @@ export function WalletScreen({
         </div>
       </header>
 
-      {/* ── Pending credential notification ─────────────── */}
-      <AnimatePresence>
-        {pending && onAcceptPending && (
-          <motion.section
-            key="pending"
-            className="pending-section"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25 }}
-          >
-            <article className="pending-card">
-              <span className="pending-mark" style={{ backgroundColor: pending.tone }}>
-                {pending.mark}
-              </span>
-              <div className="pending-copy">
-                <small>Nueva credencial</small>
-                <strong>{pending.title}</strong>
-              </div>
-              <button className="review-button" onClick={onAcceptPending}>
-                Agregar
-              </button>
-            </article>
-          </motion.section>
-        )}
-      </AnimatePresence>
-
       {/* ── Card list ────────────────────────────────────── */}
+      {credentials.length === 0 && (
+        <section className="vacio">
+          <strong>Todavía no tenés credenciales</strong>
+          <p>
+            Cuando un organismo te emita una credencial, va a aparecer acá.
+            Tocá el + para mostrarle tu código y recibirla.
+          </p>
+        </section>
+      )}
+
       <section>
         <div className="apple-wallet-list">
           {items.map((credential, index) => {
