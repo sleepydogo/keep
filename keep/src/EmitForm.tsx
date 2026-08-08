@@ -1,7 +1,10 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
+import { QRCodeSVG } from "qrcode.react";
+import { emitir } from "@keep/contract/credencial";
 import type { User } from "./api.js";
-import type { EmisorJubjub } from "./deviceKey.js";
-import { resolverDestinatario, type DestinoResuelto } from "./midnames.js";
+import { empaquetar } from "./credencialQr.js";
+import { deHex, type EmisorJubjub } from "./deviceKey.js";
+import { HolderIdField } from "./HolderIdField.js";
 
 const TIPOS_CREDENCIAL = [
   { value: "un_solo_uso", label: "Un solo uso" },
@@ -11,27 +14,10 @@ const TIPOS_CREDENCIAL = [
 
 type TipoCredencial = (typeof TIPOS_CREDENCIAL)[number]["value"];
 
-type CredentialPayload = {
-  alias: string;
-  destinatario: string;
-  addressType: string;
-  tipo: TipoCredencial;
-  titulo: string;
-  descripcion: string;
-  expiraEl: string | null;
-  diasValidez: number | null;
-  emisorId: string;
-  pk: { x: string; y: string };
-};
+const DIA = 86400n;
+const CIEN_ANIOS = 36500n * DIA;
 
-const fechaEnDias = (dias: number): string => {
-  const d = new Date();
-  d.setDate(d.getDate() + dias);
-  return d.toISOString().slice(0, 10);
-};
-
-const acortar = (addr: string) =>
-  addr.length <= 20 ? addr : `${addr.slice(0, 10)}…${addr.slice(-8)}`;
+const esHex64 = (s: string) => /^[0-9a-f]{64}$/.test(s.trim().toLowerCase());
 
 type Props = {
   user: User;
@@ -40,111 +26,38 @@ type Props = {
 };
 
 export const EmitForm = ({ user, emisor, onLogout }: Props) => {
-  const [destinatario, setDestinatario] = useState("");
+  const [holderId, setHolderId] = useState("");
   const [tipo, setTipo] = useState<TipoCredencial>("un_solo_uso");
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [expiraEl, setExpiraEl] = useState("");
   const [diasValidez, setDiasValidez] = useState("");
-  const [destino, setDestino] = useState<DestinoResuelto | null>(null);
-  const [resolviendo, setResolviendo] = useState(false);
-  const [errorDominio, setErrorDominio] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const reqId = useRef(0);
+  const [emitida, setEmitida] = useState("");
 
-  const esRecurrente = tipo === "recurrente";
-  const pideFechaExpiracion = tipo === "un_solo_uso";
-  const dominioOk = destino !== null && !errorDominio && !resolviendo;
+  const idOk = esHex64(holderId);
+  const ahora = () => BigInt(Math.floor(Date.now() / 1000));
 
-  const validarDominio = async (raw: string) => {
-    const trimmed = raw.trim();
-    if (!trimmed) {
-      setDestino(null);
-      setErrorDominio("");
-      setResolviendo(false);
-      return;
-    }
-
-    const id = ++reqId.current;
-    setResolviendo(true);
-    setErrorDominio("");
-    setDestino(null);
-
-    try {
-      const resolved = await resolverDestinatario(trimmed);
-      if (id !== reqId.current) return;
-      setDestino(resolved);
-      setErrorDominio("");
-    } catch (err) {
-      if (id !== reqId.current) return;
-      setDestino(null);
-      setErrorDominio(
-        err instanceof Error ? err.message : "No se pudo resolver el dominio",
-      );
-    } finally {
-      if (id === reqId.current) setResolviendo(false);
-    }
+  const vencimiento = (): bigint => {
+    if (tipo === "de_por_vida") return ahora() + CIEN_ANIOS;
+    if (tipo === "recurrente") return ahora() + BigInt(diasValidez || 0) * DIA;
+    return BigInt(Math.floor(new Date(expiraEl).getTime() / 1000));
   };
 
-  useEffect(() => {
-    const trimmed = destinatario.trim();
-    if (!trimmed) {
-      setDestino(null);
-      setErrorDominio("");
-      setResolviendo(false);
-      return;
-    }
-
-    const t = window.setTimeout(() => {
-      void validarDominio(trimmed);
-    }, 500);
-
-    return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- debounce solo por destinatario
-  }, [destinatario]);
-
-  const onSubmit = async (e: FormEvent) => {
+  const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     setError("");
-
-    let resolved = destino;
-    if (!resolved) {
-      setLoading(true);
-      try {
-        resolved = await resolverDestinatario(destinatario);
-        setDestino(resolved);
-      } catch (err) {
-        setErrorDominio(
-          err instanceof Error ? err.message : "No se pudo resolver el dominio",
-        );
-        setLoading(false);
-        return;
-      }
-    }
-
-    setLoading(true);
+    setEmitida("");
     try {
-      const dias = esRecurrente ? Number(diasValidez) : null;
-      const payload: CredentialPayload = {
-        alias: resolved.alias,
-        destinatario: resolved.address,
-        addressType: resolved.addressType,
-        tipo,
-        titulo: titulo.trim(),
-        descripcion: descripcion.trim(),
-        expiraEl: esRecurrente
-          ? fechaEnDias(dias!)
-          : pideFechaExpiracion
-            ? expiraEl
-            : null,
-        diasValidez: dias,
-        emisorId: emisor.emisorId,
-        pk: emisor.pk,
-      };
-      console.log("Payload del certificado", payload);
-    } finally {
-      setLoading(false);
+      const credencial = emitir(
+        emisor.sk,
+        deHex(holderId.trim().toLowerCase()),
+        vencimiento(),
+        [111n, 222n, 333n],
+      );
+      setEmitida(empaquetar(emisor.emisorId, titulo.trim(), credencial));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo emitir");
     }
   };
 
@@ -165,41 +78,11 @@ export const EmitForm = ({ user, emisor, onLogout }: Props) => {
       <p className="section-title">Nueva credencial</p>
 
       <form className="form" onSubmit={onSubmit}>
-        <label>
-          Destinatario
-          <input
-            type="text"
-            name="destinatario"
-            placeholder="usuario.night"
-            value={destinatario}
-            onChange={(e) => {
-              setDestinatario(e.target.value);
-              setDestino(null);
-              setErrorDominio("");
-            }}
-            onBlur={() => {
-              if (destinatario.trim()) void validarDominio(destinatario);
-            }}
-            required
-            autoComplete="off"
-          />
-          {resolviendo && (
-            <span className="hint">Resolviendo dominio…</span>
-          )}
-          {!resolviendo && destino && (
-            <span className="hint ok">
-              {destino.alias} → {acortar(destino.address)} ({destino.addressType})
-            </span>
-          )}
-          {!resolviendo && errorDominio && (
-            <span className="hint bad">{errorDominio}</span>
-          )}
-          {!resolviendo && !destino && !errorDominio && (
-            <span className="hint">
-              Midnames Preview: se valida al escribir o al salir del campo.
-            </span>
-          )}
-        </label>
+        <HolderIdField
+          value={holderId}
+          onChange={setHolderId}
+          valido={idOk}
+        />
 
         <label>
           Tipo de credencial
@@ -239,7 +122,7 @@ export const EmitForm = ({ user, emisor, onLogout }: Props) => {
           />
         </label>
 
-        {esRecurrente && (
+        {tipo === "recurrente" && (
           <label>
             Días de validez
             <input
@@ -252,13 +135,10 @@ export const EmitForm = ({ user, emisor, onLogout }: Props) => {
               onChange={(e) => setDiasValidez(e.target.value)}
               required
             />
-            <span className="hint">
-              Expira a los {diasValidez || "—"} días desde hoy.
-            </span>
           </label>
         )}
 
-        {pideFechaExpiracion && (
+        {tipo === "un_solo_uso" && (
           <label>
             Expira el
             <input
@@ -273,10 +153,26 @@ export const EmitForm = ({ user, emisor, onLogout }: Props) => {
 
         {error && <p className="error">{error}</p>}
 
-        <button type="submit" disabled={loading || resolviendo || !dominioOk}>
-          {loading ? "Emitiendo…" : "Emitir certificado"}
+        <button type="submit" disabled={!idOk}>
+          Emitir certificado
         </button>
       </form>
+
+      {emitida && (
+        <>
+          <p className="section-title">Credencial firmada</p>
+          <p className="hint">
+            Que la escanee con WARD. {emitida.length} caracteres.
+          </p>
+          <div className="qr-emitida">
+            <QRCodeSVG value={emitida} size={320} level="L" marginSize={2} />
+          </div>
+          <details>
+            <summary className="hint">Ver el texto</summary>
+            <textarea readOnly rows={8} value={emitida} />
+          </details>
+        </>
+      )}
     </main>
   );
 };

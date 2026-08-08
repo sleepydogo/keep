@@ -138,6 +138,24 @@
       }
     },
     {
+      "name": "holderIdPublico",
+      "pure": true,
+      "proof": false,
+      "arguments": [
+        {
+          "name": "holderSecret",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Bytes",
+        "length": 32
+      }
+    },
+    {
       "name": "holderId",
       "pure": true,
       "proof": false,

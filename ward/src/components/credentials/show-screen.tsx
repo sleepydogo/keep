@@ -1,120 +1,147 @@
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { BackButton } from '@/components/ui/back-button';
 import { Button } from '@/components/ui/button';
 import { PageContainer } from '@/components/ui/page-container';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { listar } from '@/services/credenciales';
+import { asegurarHolderSecret } from '@/services/identity';
+import { presentar } from '@/services/nodo';
 import type { Credential } from '@/types/credential';
-
-type ShowScreenProps = {
-  credential: Credential;
-  onBack: () => void;
-};
 
 const colors = Colors.light;
 
-export function ShowScreen({ credential, onBack }: ShowScreenProps) {
+type Paso = 'escanear' | 'enviando' | 'listo';
+
+export function ShowScreen({
+  credential,
+  onBack,
+}: {
+  credential: Credential;
+  onBack: () => void;
+}) {
+  const [paso, setPaso] = useState<Paso>('escanear');
+  const [error, setError] = useState('');
+  const [permiso, pedirPermiso] = useCameraPermissions();
+
+  const alEscanear = async (data: string) => {
+    if (paso !== 'escanear') return;
+    setPaso('enviando');
+    setError('');
+    try {
+      const pedido = JSON.parse(data);
+      const cred = (await listar()).find((c) => c.id === credential.id);
+      if (!cred) throw new Error('No encontramos esa credencial.');
+      if (cred.emisorId !== pedido.emisorId)
+        throw new Error('El pedido es de otro organismo.');
+
+      await presentar({
+        emisorId: pedido.emisorId,
+        nonce: pedido.nonce,
+        fechaConsulta: pedido.fechaConsulta,
+        holderSecret: await asegurarHolderSecret(),
+        credencial: cred,
+      });
+      setPaso('listo');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se pudo presentar.');
+      setPaso('escanear');
+    }
+  };
+
+  const abrirCamara = async () => {
+    if (!permiso?.granted) {
+      const r = await pedirPermiso();
+      if (!r.granted) return setError('Necesitamos la cámara.');
+    }
+  };
+
   return (
     <PageContainer>
       <BackButton onPress={onBack} />
-      <View style={styles.showHeader}>
-        <Text style={styles.kicker}>Presentando credencial</Text>
-        <Text style={styles.heading}>Información verificada</Text>
+      <View style={styles.wrap}>
+        {paso === 'escanear' && (
+          <>
+            <Text style={styles.kicker}>Presentar</Text>
+            <Text style={styles.titulo}>Escaneá el código del verificador</Text>
+            <Text style={styles.ayuda}>
+              Sólo se va a saber si tu {credential.title.toLowerCase()} está
+              vigente. Ni tu nombre, ni tus datos, ni nada más.
+            </Text>
+            {permiso?.granted ? (
+              <CameraView
+                style={styles.camara}
+                facing="back"
+                barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+                onBarcodeScanned={({ data }) => void alEscanear(data)}
+              />
+            ) : (
+              <Button label="Abrir la cámara" onPress={abrirCamara} />
+            )}
+          </>
+        )}
+
+        {paso === 'enviando' && (
+          <>
+            <Text style={styles.titulo}>Probando…</Text>
+            <Text style={styles.ayuda}>
+              Se está generando la prueba. Puede tardar unos segundos.
+            </Text>
+          </>
+        )}
+
+        {paso === 'listo' && (
+          <>
+            <Text style={styles.check}>✓</Text>
+            <Text style={styles.titulo}>Listo</Text>
+            <Text style={styles.ayuda}>
+              El verificador ya puede ver la respuesta en su teléfono.
+            </Text>
+            <Button label="Volver" onPress={onBack} />
+          </>
+        )}
+
+        {error ? <Text style={styles.error}>{error}</Text> : null}
       </View>
-      <View style={[styles.showCard, { backgroundColor: credential.tone }]}>
-        <Text style={styles.showBrand}>WARD</Text>
-        <Text style={styles.showType}>{credential.type}</Text>
-        <Text style={styles.showTitle}>{credential.title}</Text>
-        <View style={styles.showRule} />
-        <Text style={styles.showIssuer}>{credential.issuer}</Text>
-        <View style={styles.showValid}>
-          <Text style={styles.showValidMark}>✓</Text>
-          <Text style={styles.showValidText}>Válida</Text>
-        </View>
-      </View>
-      <Text style={styles.showNote}>
-        Esta credencial fue emitida por una organización confiable.
-      </Text>
-      <Button label="Cerrar" onPress={onBack} />
     </PageContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  showHeader: {
-    paddingVertical: Spacing.three,
-    gap: Spacing.one,
-  },
+  wrap: { alignItems: 'center', gap: Spacing.three },
   kicker: {
     color: colors.verified,
     fontFamily: Fonts.mono,
     fontSize: 12,
     letterSpacing: 1,
   },
-  heading: {
+  titulo: {
     color: colors.text,
     fontFamily: Fonts.serif,
-    fontSize: 42,
-    lineHeight: 48,
-    marginTop: 4,
+    fontSize: 32,
+    lineHeight: 38,
+    textAlign: 'center',
   },
-  showCard: {
-    minHeight: 360,
-    borderRadius: 22,
-    padding: Spacing.four,
-    justifyContent: 'flex-end',
-    gap: Spacing.two,
-  },
-  showBrand: {
-    color: '#FFFDF8',
-    fontFamily: Fonts.sans,
-    fontSize: 14,
-    letterSpacing: 3,
-    position: 'absolute',
-    top: Spacing.four,
-    right: Spacing.four,
-  },
-  showType: {
-    color: '#F8EBD1',
-    fontFamily: Fonts.mono,
-    fontSize: 12,
-  },
-  showTitle: {
-    color: '#FFFDF8',
-    fontFamily: Fonts.serif,
-    fontSize: 42,
-    lineHeight: 46,
-    maxWidth: 400,
-  },
-  showRule: {
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.45)',
-    marginVertical: Spacing.two,
-  },
-  showIssuer: {
-    color: '#F8EBD1',
+  ayuda: {
+    color: colors.textSecondary,
     fontFamily: Fonts.sans,
     fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
   },
-  showValid: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.one,
-    marginTop: Spacing.three,
+  camara: {
+    width: '100%',
+    aspectRatio: 1,
+    maxWidth: 320,
+    borderRadius: 16,
+    overflow: 'hidden',
   },
-  showValidMark: {
-    color: '#FFFDF8',
-    fontSize: 20,
-  },
-  showValidText: {
-    color: '#FFFDF8',
-    fontFamily: Fonts.sans,
-    fontWeight: '700',
-  },
-  showNote: {
-    color: colors.textSecondary,
+  check: { color: colors.verified, fontSize: 52 },
+  error: {
+    color: colors.danger,
     fontFamily: Fonts.sans,
     fontSize: 13,
     textAlign: 'center',
-    paddingVertical: Spacing.two,
   },
 });

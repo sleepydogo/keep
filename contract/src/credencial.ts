@@ -2,6 +2,7 @@ import {
   CompactTypeField,
   CompactTypeMerkleTreePath,
   StateBoundedMerkleTree,
+  degradeToTransient,
   ecMulGenerator,
   jubjubPointX,
   jubjubPointY,
@@ -20,6 +21,8 @@ const ORDEN =
 const TWO_248 =
   452312848583266388373324160190187140051835877600158453279131187530910662656n;
 const PROFUNDIDAD = 4;
+
+export { pureCircuits } from "./managed/keep/contract/index.js";
 
 export type Credencial = {
   fechaVencimiento: bigint;
@@ -92,9 +95,11 @@ const firmar = (sk: bigint, msg: bigint[]): Schnorr_SchnorrSignature => {
   return { announcement: R, response: (k + c * sk) % ORDEN };
 };
 
+// El emisor nunca ve el holderSecret: del QR recibe los 32 bytes del
+// holderIdPublico, y degradeToTransient los lleva al Field que firma.
 export const emitir = (
   sk: bigint,
-  holderSecret: Uint8Array,
+  holderIdPublico: Uint8Array,
   fechaVencimiento: bigint,
   otras: bigint[],
 ): Credencial => {
@@ -102,7 +107,7 @@ export const emitir = (
   return {
     fechaVencimiento,
     hojas,
-    firma: firmar(sk, [pureCircuits.holderId(holderSecret), raiz(hojas)]),
+    firma: firmar(sk, [degradeToTransient(holderIdPublico), raiz(hojas)]),
   };
 };
 
