@@ -11,7 +11,7 @@ export type Emisor = {
 
 export const EMISORES: Emisor[] = [
   {
-    id: '0000000000000000000000000000000000000000000000000000000000000000',
+    id: '3b6b6955ecce5cc458ccd3357da286383340ef1bbfa23d7ff8d5d7bcae5b0a07',
     nombre: 'REPROCANN',
     detalle: 'Ministerio de Salud de la Nación',
   },

@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { BackButton } from '@/components/ui/back-button';
+import { Button } from '@/components/ui/button';
 import { PageContainer } from '@/components/ui/page-container';
 import { QRCode } from '@/components/ui/qr-code';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
@@ -11,11 +12,16 @@ type DetailScreenProps = {
   credentials?: Credential[];
   onSelectCredential?: (credential: Credential) => void;
   onBack: () => void;
+  onPresentar?: () => void;
 };
 
 const colors = Colors.light;
 
-export function DetailScreen({ credential, onBack }: DetailScreenProps) {
+export function DetailScreen({
+  credential,
+  onBack,
+  onPresentar,
+}: DetailScreenProps) {
   return (
     <PageContainer>
       <BackButton onPress={onBack} label="Volver" />
@@ -26,6 +32,7 @@ export function DetailScreen({ credential, onBack }: DetailScreenProps) {
       </View>
       <CredentialInfo credential={credential} />
       <Text style={styles.details}>{credential.details}</Text>
+      {onPresentar && <Button label="Presentar" onPress={onPresentar} />}
       <View style={styles.qr}>
         <QRCode value={`ward:credential:${credential.id}`} size={160} />
       </View>

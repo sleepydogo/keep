@@ -28,6 +28,7 @@ export default function HomeScreen() {
     openCredential,
     goToWallet,
     goToDetail,
+    goToShow,
     goToId,
     goToSettings,
   } = useCredentials();
@@ -70,6 +71,7 @@ export default function HomeScreen() {
           credentials={credentials}
           onSelectCredential={openCredential}
           onBack={goToWallet}
+          onPresentar={goToShow}
         />
       );
     case 'show':
