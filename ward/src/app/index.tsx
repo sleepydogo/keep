@@ -1,4 +1,4 @@
-import { WalletScreen } from '@/components/web/wallet-screen.web';
+import { WalletScreen } from '@/components/credentials/wallet-screen';
 import { OnboardingFlow } from '@/components/onboarding/onboarding-flow';
 import { PendingScreen } from '@/components/credentials/pending-screen';
 import { AddedScreen } from '@/components/credentials/added-screen';
@@ -12,8 +12,10 @@ import { VerifierResultScreen } from '@/components/verifier/verifier-result-scre
 import { useOnboarding } from '@/hooks/use-onboarding';
 import { useCredentials } from '@/hooks/use-credentials';
 import { useAppMode } from '@/hooks/use-app-mode';
+import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
+  const router = useRouter();
   const {
     step,
     goToWarning,
@@ -31,7 +33,6 @@ export default function HomeScreen() {
     credentials,
     openCredential,
     acceptPending,
-    viewPendingDetail,
     goToWallet,
     goToDetail,
     enableDemoAccepted,
@@ -114,9 +115,14 @@ export default function HomeScreen() {
           key={accepted ? 'accepted' : 'pending'}
           credentials={credentials}
           pending={pending}
-          onOpen={openCredential}
+           onOpen={(credential) =>
+             router.push({ pathname: '/wallet/[id]', params: { id: credential.id } })
+           }
           onAcceptPending={acceptPending}
-          onSwitchMode={() => switchMode('verifier')}
+           onSwitchMode={() => {
+             switchMode('verifier');
+             router.push('/verifier');
+           }}
         />
       );
   }

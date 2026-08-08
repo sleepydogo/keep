@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { BackButton } from '@/components/ui/back-button';
 import { Button } from '@/components/ui/button';
-import { PageContainer } from '@/components/ui/page-container';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { ScreenContainer } from '@/components/ui/screen-container';
+import { AppIcon } from '@/components/ui/app-icon';
+import { colors, Spacing, BorderRadius, Fonts } from '@/constants/theme';
 import type { Credential } from '@/types/credential';
 
 type ShowScreenProps = {
@@ -10,24 +10,21 @@ type ShowScreenProps = {
   onBack: () => void;
 };
 
-const colors = Colors.light;
-
 export function ShowScreen({ credential, onBack }: ShowScreenProps) {
   return (
-    <PageContainer>
-      <BackButton onPress={onBack} />
+    <ScreenContainer>
       <View style={styles.showHeader}>
         <Text style={styles.kicker}>Presentando credencial</Text>
         <Text style={styles.heading}>Información verificada</Text>
       </View>
-      <View style={[styles.showCard, { backgroundColor: credential.tone }]}>
+      <View style={[styles.showCard, { backgroundColor: credential.tone || colors.surface }]}>
         <Text style={styles.showBrand}>WARD</Text>
         <Text style={styles.showType}>{credential.type}</Text>
         <Text style={styles.showTitle}>{credential.title}</Text>
         <View style={styles.showRule} />
         <Text style={styles.showIssuer}>{credential.issuer}</Text>
         <View style={styles.showValid}>
-          <Text style={styles.showValidMark}>✓</Text>
+          <AppIcon name="checkmark.circle.fill" size={20} tintColor="#FFFDF8" />
           <Text style={styles.showValidText}>Válida</Text>
         </View>
       </View>
@@ -35,7 +32,7 @@ export function ShowScreen({ credential, onBack }: ShowScreenProps) {
         Esta credencial fue emitida por una organización confiable.
       </Text>
       <Button label="Cerrar" onPress={onBack} />
-    </PageContainer>
+    </ScreenContainer>
   );
 }
 
@@ -43,26 +40,28 @@ const styles = StyleSheet.create({
   showHeader: {
     paddingVertical: Spacing.three,
     gap: Spacing.one,
+    marginBottom: Spacing.four,
   },
   kicker: {
-    color: colors.verified,
+    color: colors.success,
     fontFamily: Fonts.mono,
     fontSize: 12,
     letterSpacing: 1,
   },
   heading: {
     color: colors.text,
-    fontFamily: Fonts.serif,
+    fontFamily: Fonts.sans,
     fontSize: 42,
     lineHeight: 48,
-    marginTop: 4,
+    fontWeight: '700',
   },
   showCard: {
     minHeight: 360,
-    borderRadius: 22,
+    borderRadius: BorderRadius.xl,
     padding: Spacing.four,
     justifyContent: 'flex-end',
     gap: Spacing.two,
+    marginBottom: Spacing.four,
   },
   showBrand: {
     color: '#FFFDF8',
@@ -80,10 +79,10 @@ const styles = StyleSheet.create({
   },
   showTitle: {
     color: '#FFFDF8',
-    fontFamily: Fonts.serif,
+    fontFamily: Fonts.sans,
     fontSize: 42,
     lineHeight: 46,
-    maxWidth: 400,
+    fontWeight: '700',
   },
   showRule: {
     height: 1,
@@ -101,14 +100,11 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
     marginTop: Spacing.three,
   },
-  showValidMark: {
-    color: '#FFFDF8',
-    fontSize: 20,
-  },
   showValidText: {
     color: '#FFFDF8',
     fontFamily: Fonts.sans,
     fontWeight: '700',
+    fontSize: 16,
   },
   showNote: {
     color: colors.textSecondary,

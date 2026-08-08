@@ -1,94 +1,78 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { AppMode } from '@/types/app';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { ScreenContainer } from '@/components/ui/screen-container';
+import { AppIcon } from '@/components/ui/app-icon';
+import { colors, Spacing, BorderRadius, Fonts } from '@/constants/theme';
 
 type RoleSelectionScreenProps = {
   onSelect: (mode: AppMode) => void;
 };
 
-const colors = Colors.light;
-
 export function RoleSelectionScreen({ onSelect }: RoleSelectionScreenProps) {
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
-      <View style={styles.container}>
-        <View style={styles.brand}>
-          <View style={styles.logoRow}>
-            <Text style={styles.brandName}>KEEP</Text>
-            <View style={styles.brandDot} />
-          </View>
-          <Text style={styles.brandSub}>Verifiable Credentials</Text>
+    <ScreenContainer>
+      <View style={styles.brand}>
+        <View style={styles.logoRow}>
+          <Text style={styles.brandName}>KEEP</Text>
+          <View style={styles.brandDot} />
         </View>
-
-        <View style={styles.cardsContainer}>
-          <Pressable
-            style={({ pressed }) => [
-              styles.card,
-              styles.cardHolder,
-              pressed && styles.cardPressed,
-            ]}
-            onPress={() => onSelect('holder')}
-          >
-            <View style={styles.iconContainer}>
-              <Text style={styles.iconText}>👤</Text>
-            </View>
-            <Text style={styles.cardTitle}>Ver mis credenciales</Text>
-            <Text style={styles.cardDescription}>
-              Gestionar y presentar documentos desde WARD
-            </Text>
-            <View style={styles.badgeContainer}>
-              <Text style={styles.badgeText}>WARD</Text>
-            </View>
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.card,
-              styles.cardVerifier,
-              pressed && styles.cardPressed,
-            ]}
-            onPress={() => onSelect('verifier')}
-          >
-            <View style={styles.iconContainer}>
-              <Text style={styles.iconText}>👁</Text>
-            </View>
-            <Text style={styles.cardTitle}>Verificar una credencial</Text>
-            <Text style={styles.cardDescription}>
-              Confirmar la validez de un documento con KEEP
-            </Text>
-            <View style={styles.badgeContainer}>
-              <Text style={styles.badgeText}>KEEP</Text>
-            </View>
-          </Pressable>
-        </View>
-
-        <Text style={styles.footerText}>
-          Seleccioná el modo según lo que quieras hacer en este momento.
-        </Text>
+        <Text style={styles.brandSub}>Verifiable Credentials</Text>
       </View>
-    </ScrollView>
+
+      <View style={styles.cardsContainer}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.card,
+            styles.cardHolder,
+            pressed && styles.cardPressed,
+          ]}
+          onPress={() => onSelect('holder')}
+        >
+          <View style={styles.iconContainer}>
+            <AppIcon name="person.badge.key.fill" size={24} tintColor={colors.accent} />
+          </View>
+          <Text style={styles.cardTitle}>Ver mis credenciales</Text>
+          <Text style={styles.cardDescription}>
+            Gestionar y presentar documentos desde WARD
+          </Text>
+          <View style={styles.badgeContainer}>
+            <Text style={styles.badgeText}>WARD</Text>
+          </View>
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.card,
+            pressed && styles.cardPressed,
+          ]}
+          onPress={() => onSelect('verifier')}
+        >
+          <View style={styles.iconContainer}>
+            <AppIcon name="qrcode" size={24} tintColor={colors.textSecondary} />
+          </View>
+          <Text style={styles.cardTitle}>Verificar una credencial</Text>
+          <Text style={styles.cardDescription}>
+            Confirmar la validez de un documento con KEEP
+          </Text>
+          <View style={styles.badgeContainer}>
+            <Text style={[styles.badgeText, { color: colors.textSecondary }]}>KEEP</Text>
+          </View>
+        </Pressable>
+      </View>
+
+      <Text style={styles.footerText}>
+        Seleccioná el modo según lo que quieras hacer en este momento.
+      </Text>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContent: {
-    flexGrow: 1,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: Spacing.four,
-  },
-  container: {
-    width: '100%',
-    maxWidth: 480,
-    alignItems: 'center',
-    gap: Spacing.five,
-    paddingVertical: Spacing.four,
-  },
   brand: {
     alignItems: 'center',
     gap: Spacing.one,
+    paddingVertical: Spacing.six,
   },
   logoRow: {
     flexDirection: 'row',
@@ -106,7 +90,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.action,
+    backgroundColor: colors.accent,
   },
   brandSub: {
     color: colors.textSecondary,
@@ -119,19 +103,15 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   card: {
-    backgroundColor: colors.backgroundElement,
-    borderRadius: 20,
+    backgroundColor: colors.surface,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
     borderColor: colors.border,
     padding: Spacing.four,
     gap: Spacing.two,
-    position: 'relative',
   },
   cardHolder: {
-    borderColor: colors.action,
-  },
-  cardVerifier: {
-    borderColor: colors.border,
+    borderColor: colors.accent,
   },
   cardPressed: {
     opacity: 0.85,
@@ -146,12 +126,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: Spacing.one,
   },
-  iconText: {
-    fontSize: 24,
-  },
   cardTitle: {
     color: colors.text,
-    fontFamily: Fonts.serif,
+    fontFamily: Fonts.sans,
     fontSize: 20,
     fontWeight: '700',
   },
@@ -172,7 +149,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.one,
   },
   badgeText: {
-    color: colors.action,
+    color: colors.accent,
     fontFamily: Fonts.mono,
     fontSize: 11,
     fontWeight: '700',
@@ -183,7 +160,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans,
     fontSize: 13,
     textAlign: 'center',
-    marginTop: Spacing.two,
+    marginTop: Spacing.three,
   },
 });
-

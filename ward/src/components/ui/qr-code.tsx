@@ -1,4 +1,7 @@
-import { StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Text, Platform, Pressable } from 'react-native';
+import * as ScreenCapture from 'expo-screen-capture';
+import { AppIcon } from './app-icon';
 
 type QRCodeProps = {
   value: string;
@@ -113,26 +116,71 @@ export function QRCode({
   color = '#1C1917',
   backgroundColor = '#FFFFFF',
 }: QRCodeProps) {
+  const [isBlocked, setIsBlocked] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+
+    // Prevent screen capture / screenshots on mobile (Android FLAG_SECURE & iOS recording/capture flag)
+    ScreenCapture.preventScreenCaptureAsync('qr-code-protection').catch(() => {});
+
+    // Enable app switcher blur protection on iOS
+    if (Platform.OS === 'ios') {
+      ScreenCapture.enableAppSwitcherProtectionAsync(0.9).catch(() => {});
+    }
+
+    // Listener for screenshot events (triggers overlay protection on iOS/Android if screenshot is attempted)
+    const subscription = ScreenCapture.addScreenshotListener(() => {
+      setIsBlocked(true);
+    });
+
+    return () => {
+      ScreenCapture.allowScreenCaptureAsync('qr-code-protection').catch(() => {});
+      if (Platform.OS === 'ios') {
+        ScreenCapture.disableAppSwitcherProtectionAsync().catch(() => {});
+      }
+      subscription.remove();
+    };
+  }, []);
+
   const matrix = generateQRMatrix(value);
   const cellSize = size / matrix.length;
 
   return (
-    <View style={[styles.container, { width: size + 16, height: size + 16, backgroundColor }]}>
-      <View style={{ width: size, height: size }}>
-        {matrix.map((row, r) => (
-          <View key={r} style={styles.row}>
-            {row.map((isDark, c) => (
-              <View
-                key={c}
-                style={{
-                  width: cellSize,
-                  height: cellSize,
-                  backgroundColor: isDark ? color : backgroundColor,
-                }}
-              />
-            ))}
-          </View>
-        ))}
+    <View style={[styles.container, { width: size + 16, height: size + 36, backgroundColor }]}>
+      <View style={{ width: size, height: size, position: 'relative' }}>
+        {isBlocked ? (
+          <Pressable
+            style={styles.blockedOverlay}
+            onPress={() => setIsBlocked(false)}
+          >
+            <AppIcon name="shield.checkmark.fill" size={36} tintColor="#EF4444" />
+            <Text style={styles.blockedTitle}>Captura Bloqueada</Text>
+            <Text style={styles.blockedSubtext}>Por seguridad, el QR no se puede capturar.</Text>
+            <Text style={styles.unblockBtn}>Tocar para mostrar</Text>
+          </Pressable>
+        ) : (
+          matrix.map((row, r) => (
+            <View key={r} style={styles.row}>
+              {row.map((isDark, c) => (
+                <View
+                  key={c}
+                  style={{
+                    width: cellSize,
+                    height: cellSize,
+                    backgroundColor: isDark ? color : backgroundColor,
+                  }}
+                />
+              ))}
+            </View>
+          ))
+        )}
+      </View>
+
+      {/* Screenshot Protection Indicator Badge */}
+      <View style={styles.securityBadge}>
+        <AppIcon name="shield.checkmark.fill" size={12} tintColor="#059669" />
+        <Text style={styles.securityBadgeText}>Protegido contra capturas</Text>
       </View>
     </View>
   );
@@ -148,4 +196,42 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
   },
+  blockedOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#0F172A',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+  },
+  blockedTitle: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
+    marginTop: 6,
+  },
+  blockedSubtext: {
+    color: '#94A3B8',
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  unblockBtn: {
+    color: '#38BDF8',
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 8,
+  },
+  securityBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 6,
+  },
+  securityBadgeText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#059669',
+  },
 });
+

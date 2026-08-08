@@ -1,15 +1,15 @@
 import React from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { CARD_TEMPLATES, CardTemplate } from '@/constants/card-templates';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { AppIcon } from '@/components/ui/app-icon';
+import { colors, Spacing, BorderRadius, Fonts } from '@/constants/theme';
 
 type TemplateSelectorProps = {
   currentId?: string;
   onSelect: (template: CardTemplate) => void;
   onClose: () => void;
 };
-
-const colors = Colors.light;
 
 export function TemplateSelector({ currentId, onSelect, onClose }: TemplateSelectorProps) {
   return (
@@ -19,7 +19,7 @@ export function TemplateSelector({ currentId, onSelect, onClose }: TemplateSelec
           <View style={styles.header}>
             <Text style={styles.title}>Diseño de tarjeta</Text>
             <Pressable style={styles.closeBtn} onPress={onClose}>
-              <Text style={styles.closeBtnText}>✕</Text>
+              <AppIcon name="xmark" size={18} tintColor={colors.textSecondary} />
             </Pressable>
           </View>
 
@@ -27,15 +27,20 @@ export function TemplateSelector({ currentId, onSelect, onClose }: TemplateSelec
             {CARD_TEMPLATES.map((t) => (
               <Pressable
                 key={t.id}
-                style={[
-                  styles.chip,
-                  { backgroundColor: colors.backgroundElement },
-                  t.id === currentId && styles.chipSelected,
-                ]}
+                style={[styles.chip, t.id === currentId && styles.chipSelected]}
                 onPress={() => onSelect(t)}
               >
-                <Text style={[styles.chipName, { color: colors.text }]}>{t.name}</Text>
-                {t.id === currentId && <Text style={[styles.chipCheck, { color: colors.action }]}>✓</Text>}
+                <LinearGradient
+                  colors={t.gradient.colors}
+                  start={t.gradient.start}
+                  end={t.gradient.end}
+                  style={styles.chipGradient}
+                >
+                  <Text style={styles.chipName}>{t.name}</Text>
+                  {t.id === currentId && (
+                    <AppIcon name="checkmark.circle.fill" size={14} tintColor="#FFFFFF" />
+                  )}
+                </LinearGradient>
               </Pressable>
             ))}
           </View>
@@ -53,8 +58,8 @@ const styles = StyleSheet.create({
   },
   panel: {
     backgroundColor: colors.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
     padding: Spacing.four,
     gap: Spacing.three,
     borderTopWidth: 1,
@@ -67,16 +72,12 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.text,
-    fontFamily: Fonts.serif,
+    fontFamily: Fonts.sans,
     fontSize: 18,
     fontWeight: '700',
   },
   closeBtn: {
     padding: Spacing.one,
-  },
-  closeBtnText: {
-    color: colors.textSecondary,
-    fontSize: 18,
   },
   grid: {
     flexDirection: 'row',
@@ -85,25 +86,27 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
   },
   chip: {
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    borderRadius: 12,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  chipGradient: {
+    minWidth: 112,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: Spacing.one,
   },
   chipSelected: {
-    borderColor: colors.action,
+    borderColor: colors.accent,
   },
   chipName: {
     fontFamily: Fonts.sans,
     fontSize: 14,
     fontWeight: '600',
-  },
-  chipCheck: {
-    fontSize: 14,
-    fontWeight: '700',
+    color: '#FFFFFF',
   },
 });

@@ -1,25 +1,28 @@
+import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { pendingCredential } from '@/constants/mock-data';
-import { BackButton } from '@/components/ui/back-button';
 import { Button } from '@/components/ui/button';
-import { PageContainer } from '@/components/ui/page-container';
+import { ScreenContainer } from '@/components/ui/screen-container';
 import { CredentialInfo } from './credential-info';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { AppIcon } from '@/components/ui/app-icon';
+import { colors, Spacing, BorderRadius, Fonts } from '@/constants/theme';
 
 type PendingScreenProps = {
   onAccept: () => void;
   onBack: () => void;
 };
 
-const colors = Colors.light;
-
 export function PendingScreen({ onAccept, onBack }: PendingScreenProps) {
   return (
-    <PageContainer>
-      <BackButton onPress={onBack} />
+    <ScreenContainer>
+      <Pressable style={styles.backRow} onPress={onBack}>
+        <AppIcon name="chevron.left" size={18} tintColor={colors.accent} />
+        <Text style={styles.backText}>Volver</Text>
+      </Pressable>
+
       <View style={styles.reviewWrap}>
-        <View style={[styles.largeMark, { backgroundColor: pendingCredential.tone }]}>
-          <Text style={styles.largeMarkText}>✓</Text>
+        <View style={[styles.largeMark, { backgroundColor: pendingCredential.tone || colors.accent }]}>
+          <AppIcon name="checkmark.circle.fill" size={40} tintColor="#FFFDF8" />
         </View>
         <Text style={styles.reviewKicker}>Recibiste una credencial</Text>
         <Text style={styles.reviewTitle}>{pendingCredential.title}</Text>
@@ -31,44 +34,48 @@ export function PendingScreen({ onAccept, onBack }: PendingScreenProps) {
           <Text style={styles.rejectText}>Rechazar</Text>
         </Pressable>
       </View>
-    </PageContainer>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
+  backRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: Spacing.three,
+  },
+  backText: {
+    color: colors.accent,
+    fontFamily: Fonts.sans,
+    fontSize: 16,
+    fontWeight: '600',
+  },
   reviewWrap: {
     alignItems: 'center',
     gap: Spacing.three,
-    paddingVertical: Spacing.five,
-    maxWidth: 500,
-    alignSelf: 'center',
-    width: '100%',
+    paddingVertical: Spacing.four,
   },
   largeMark: {
     width: 92,
     height: 92,
-    borderRadius: 28,
+    borderRadius: BorderRadius.xl,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.two,
   },
-  largeMarkText: {
-    color: '#FFFDF8',
-    fontFamily: Fonts.serif,
-    fontSize: 34,
-    fontWeight: '700',
-  },
   reviewKicker: {
-    color: colors.verified,
+    color: colors.success,
     fontFamily: Fonts.mono,
     fontSize: 12,
     letterSpacing: 0.5,
   },
   reviewTitle: {
     color: colors.text,
-    fontFamily: Fonts.serif,
+    fontFamily: Fonts.sans,
     fontSize: 36,
     textAlign: 'center',
+    fontWeight: '700',
   },
   reviewIssuer: {
     color: colors.textSecondary,
@@ -86,7 +93,7 @@ const styles = StyleSheet.create({
     padding: Spacing.two,
   },
   rejectText: {
-    color: colors.reject,
+    color: colors.danger,
     fontFamily: Fonts.sans,
     fontSize: 14,
     fontWeight: '600',

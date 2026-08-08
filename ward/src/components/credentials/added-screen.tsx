@@ -1,81 +1,71 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { QRCode } from "@/components/ui/qr-code";
-import type { Credential } from "@/types/credential";
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { QRCode } from '@/components/ui/qr-code';
+import type { Credential } from '@/types/credential';
+import { ScreenContainer } from '@/components/ui/screen-container';
+import { AppIcon } from '@/components/ui/app-icon';
+import { colors, Spacing, BorderRadius, Fonts } from '@/constants/theme';
 
 type AddedScreenProps = {
   credential: Credential;
   onBack: () => void;
 };
 
-const colors = Colors.light;
-
 export function AddedScreen({ credential, onBack }: AddedScreenProps) {
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Pressable style={styles.backBtn} onPress={onBack}>
-            <Text style={styles.backBtnText}>‹ Volver al tarjetero</Text>
-          </Pressable>
-        </View>
+    <ScreenContainer>
+      <Pressable style={styles.backRow} onPress={onBack}>
+        <AppIcon name="chevron.left" size={18} tintColor={colors.accent} />
+        <Text style={styles.backText}>Volver al tarjetero</Text>
+      </Pressable>
 
-        <View style={styles.qrCard}>
-          <Text style={styles.qrTitle}>Código QR para Verificación Criptográfica</Text>
-          <View style={styles.qrBox}>
-            <QRCode value={`ward:credential:${credential.id}`} size={160} />
-          </View>
-          <View style={styles.statusPill}>
-            <Text style={styles.statusIcon}>✓</Text>
-            <Text style={styles.statusText}>Credencial Verificada y Válida</Text>
-          </View>
+      <View style={styles.qrCard}>
+        <Text style={styles.qrTitle}>Código QR para Verificación Criptográfica</Text>
+        <View style={styles.qrBox}>
+          <QRCode value={`ward:credential:${credential.id}`} size={160} />
         </View>
-
-        <View style={styles.messageBox}>
-          <Text style={styles.successTitle}>✓ Agregada Exitosamente</Text>
-          <Text style={styles.successDesc}>
-            Tu credencial {credential.title} ya está disponible. Podés validarla
-            escaneando o acercándola al lector NFC.
-          </Text>
+        <View style={styles.statusPill}>
+          <AppIcon name="checkmark.circle.fill" size={14} tintColor={colors.success} />
+          <Text style={styles.statusText}>Credencial Verificada y Válida</Text>
         </View>
       </View>
-    </ScrollView>
+
+      <View style={styles.messageBox}>
+        <View style={styles.successRow}>
+          <AppIcon name="checkmark.circle.fill" size={22} tintColor={colors.success} />
+          <Text style={styles.successTitle}>Agregada Exitosamente</Text>
+        </View>
+        <Text style={styles.successDesc}>
+          Tu credencial {credential.title} ya está disponible. Podés validarla
+          escaneando o acercándola al lector NFC.
+        </Text>
+      </View>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContent: {
-    flexGrow: 1,
-    backgroundColor: colors.background,
+  backRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: Spacing.four,
+    gap: 4,
+    marginBottom: Spacing.four,
   },
-  container: {
-    width: '100%',
-    maxWidth: 480,
-    gap: Spacing.four,
-  },
-  header: {
-    paddingBottom: Spacing.two,
-  },
-  backBtn: {
-    alignSelf: 'flex-start',
-  },
-  backBtnText: {
-    color: colors.action,
+  backText: {
+    color: colors.accent,
     fontFamily: Fonts.sans,
     fontSize: 16,
     fontWeight: '600',
   },
   qrCard: {
-    backgroundColor: colors.backgroundElement,
-    borderRadius: 20,
+    backgroundColor: colors.surface,
+    borderRadius: BorderRadius.xl,
     padding: Spacing.four,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
     gap: Spacing.three,
+    marginBottom: Spacing.four,
   },
   qrTitle: {
     color: colors.textSecondary,
@@ -86,7 +76,7 @@ const styles = StyleSheet.create({
   qrBox: {
     padding: Spacing.two,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: BorderRadius.lg,
   },
   statusPill: {
     flexDirection: 'row',
@@ -97,25 +87,24 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.one,
     borderRadius: 20,
   },
-  statusIcon: {
-    color: colors.verified,
-    fontSize: 14,
-    fontWeight: '700',
-  },
   statusText: {
-    color: colors.verified,
+    color: colors.success,
     fontFamily: Fonts.sans,
     fontSize: 12,
     fontWeight: '600',
   },
   messageBox: {
-    alignItems: 'center',
     gap: Spacing.two,
     paddingVertical: Spacing.two,
   },
+  successRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
   successTitle: {
-    color: colors.verified,
-    fontFamily: Fonts.serif,
+    color: colors.success,
+    fontFamily: Fonts.sans,
     fontSize: 22,
     fontWeight: '700',
   },
@@ -123,7 +112,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontFamily: Fonts.sans,
     fontSize: 14,
-    textAlign: 'center',
     lineHeight: 20,
   },
 });

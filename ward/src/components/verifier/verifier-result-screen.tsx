@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { AppIcon } from '@/components/ui/app-icon';
 
 type VerifierResultVariant = 'valid' | 'invalid' | 'offline';
 
@@ -42,7 +43,7 @@ export function VerifierResultScreen({ variant, onDone, onScanAgain }: VerifierR
 
         <View style={styles.resultSection}>
           <View style={[styles.badge, isValid ? styles.badgeValid : styles.badgeInvalid]}>
-            <Text style={styles.badgeIcon}>{isValid ? '✓' : '✕'}</Text>
+            <AppIcon name={isValid ? 'checkmark.circle.fill' : 'xmark.circle.fill'} size={30} tintColor={colors.text} />
           </View>
 
           <Text style={[styles.resultTitle, isValid ? styles.titleValid : styles.titleInvalid]}>
@@ -68,7 +69,7 @@ export function VerifierResultScreen({ variant, onDone, onScanAgain }: VerifierR
 
               <View style={styles.verifiedBlock}>
                 <View style={styles.verifiedHeader}>
-                  <Text style={styles.verifiedHeaderIcon}>✓</Text>
+                  <AppIcon name="checkmark.circle.fill" size={16} tintColor={colors.verified} />
                   <Text style={styles.verifiedHeaderText}>Dato verificado</Text>
                 </View>
                 <Text style={styles.attribute}>{credentialData.verifiedAttribute}</Text>
@@ -81,7 +82,7 @@ export function VerifierResultScreen({ variant, onDone, onScanAgain }: VerifierR
               </View>
 
               <View style={styles.privacyNote}>
-                <Text style={styles.privacyIcon}>🔒</Text>
+                <AppIcon name="shield.checkmark.fill" size={20} tintColor={colors.textFaint} />
                 <View style={styles.privacyContent}>
                   <Text style={styles.privacyTitle}>Datos no revelados</Text>
                   <Text style={styles.privacyDesc}>Nombre · DNI · Fecha de nacimiento</Text>

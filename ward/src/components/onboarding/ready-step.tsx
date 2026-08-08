@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { OnboardingLayout } from './onboarding-layout';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { AppIcon } from '@/components/ui/app-icon';
 
 type ReadyStepProps = {
   onReady: () => void;
@@ -13,7 +14,7 @@ export function ReadyStep({ onReady }: ReadyStepProps) {
   return (
     <OnboardingLayout>
       <View style={styles.successMark}>
-        <Text style={styles.successText}>✓</Text>
+        <AppIcon name="checkmark.circle.fill" size={32} tintColor={colors.verified} />
       </View>
       <View style={styles.onboardingCopy}>
         <Text style={styles.kicker}>Listo</Text>

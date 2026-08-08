@@ -1,13 +1,13 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { ScreenContainer } from '@/components/ui/screen-container';
+import { AppIcon } from '@/components/ui/app-icon';
+import { colors, Spacing, BorderRadius, Fonts } from '@/constants/theme';
 
 type VerifierScanningScreenProps = {
   onBack: () => void;
   onProcessed: () => void;
 };
-
-const colors = Colors.light;
 
 export function VerifierScanningScreen({ onBack, onProcessed }: VerifierScanningScreenProps) {
   React.useEffect(() => {
@@ -16,7 +16,7 @@ export function VerifierScanningScreen({ onBack, onProcessed }: VerifierScanning
   }, [onProcessed]);
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer>
       <View style={styles.header}>
         <View style={styles.brandRow}>
           <Text style={styles.brandText}>KEEP</Text>
@@ -26,7 +26,7 @@ export function VerifierScanningScreen({ onBack, onProcessed }: VerifierScanning
 
       <View style={styles.content}>
         <View style={styles.viewfinder}>
-          <Text style={styles.viewfinderIcon}>📷</Text>
+          <AppIcon name="qrcode" size={64} tintColor={colors.accent} />
         </View>
 
         <Text style={styles.title}>Escaneando...</Text>
@@ -39,21 +39,14 @@ export function VerifierScanningScreen({ onBack, onProcessed }: VerifierScanning
           <Text style={styles.cancelBtnText}>Cancelar</Text>
         </Pressable>
       </View>
-    </View>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    padding: Spacing.four,
-    alignItems: 'center',
-  },
   header: {
-    width: '100%',
-    maxWidth: 480,
-    paddingBottom: Spacing.two,
+    paddingBottom: Spacing.three,
+    marginBottom: Spacing.three,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
@@ -73,11 +66,9 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: colors.action,
+    backgroundColor: colors.accent,
   },
   content: {
-    width: '100%',
-    maxWidth: 480,
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -86,20 +77,17 @@ const styles = StyleSheet.create({
   viewfinder: {
     width: 200,
     height: 200,
-    borderRadius: 24,
+    borderRadius: BorderRadius.xl,
     borderWidth: 2,
-    borderColor: colors.action,
+    borderColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(242, 84, 45, 0.08)',
     marginBottom: Spacing.two,
   },
-  viewfinderIcon: {
-    fontSize: 64,
-  },
   title: {
     color: colors.text,
-    fontFamily: Fonts.serif,
+    fontFamily: Fonts.sans,
     fontSize: 24,
     fontWeight: '700',
   },
@@ -113,7 +101,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.four,
     paddingVertical: Spacing.two,
     paddingHorizontal: Spacing.four,
-    backgroundColor: colors.backgroundElement,
+    backgroundColor: colors.surface,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: colors.border,

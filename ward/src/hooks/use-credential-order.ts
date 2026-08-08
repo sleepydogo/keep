@@ -89,6 +89,7 @@ export function useCredentialOrder(credentials: Credential[]) {
   return {
     items,
     draggingId,
+    setDraggingId,
     moveItem,
   };
 }
