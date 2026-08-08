@@ -1,24 +1,16 @@
 import React, { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import type { Credential } from '@/types/credential';
 import { getTemplate } from '@/constants/card-templates';
 import { TemplateSelector } from './template-selector';
-
-export function ContactlessIcon({ size = 16, color = 'currentColor' }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size * 1.2} viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M4 18.5C6.5 15.5 6.5 8.5 4 5.5" stroke={color} strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M9.5 20.5C13 16.5 13 7.5 9.5 3.5" stroke={color} strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M15 22.5C19.5 17.5 19.5 6.5 15 1.5" stroke={color} strokeWidth="2.2" strokeLinecap="round" />
-    </svg>
-  );
-}
+import { AppIcon } from '@/components/ui/app-icon';
+import { Spacing, BorderRadius, Fonts } from '@/constants/theme';
 
 type AppleWalletCardProps = {
   credential: Credential;
   onClick?: () => void;
   masked?: boolean;
-  className?: string;
-  style?: React.CSSProperties;
   onTemplateChange?: (templateId: string) => void;
 };
 
@@ -26,76 +18,75 @@ export function AppleWalletCard({
   credential,
   onClick,
   masked = false,
-  className = '',
-  style,
   onTemplateChange,
 }: AppleWalletCardProps) {
   const [showTemplates, setShowTemplates] = useState(false);
   const template = getTemplate(credential.templateId);
-
-  const bgStyle: React.CSSProperties = {
-    background: credential.gradient || template.gradient,
-    ...style,
-  };
-
   const accentColor = template.accent;
-
-  const handleGear = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowTemplates(true);
-  };
+  const gradColors = template.gradient.colors;
 
   return (
     <>
-      <div
-        className={`apple-pass-card ${className}`}
-        style={bgStyle}
-        onClick={onClick}
-        role={onClick ? 'button' : undefined}
-        tabIndex={onClick ? 0 : undefined}
+      <Pressable
+        style={({ pressed }) => [pressed && styles.pressed]}
+        onPress={onClick}
       >
-        <div className="pass-gloss-overlay" />
-        <div className="pass-chip-pattern" />
+        <LinearGradient
+          colors={gradColors}
+          start={template.gradient.start}
+          end={template.gradient.end}
+          style={styles.card}
+        >
+          <View style={styles.gloss} />
 
-        {/* Top Header */}
-        <div className="pass-header">
-          <div className="pass-brand">
-            <span className="pass-mark-icon" style={{ borderColor: `${accentColor}40`, background: `${accentColor}22`, color: accentColor }}>
-              {credential.mark}
-            </span>
-            <span className="pass-issuer-name">{masked ? '••••••••' : credential.issuer}</span>
-          </div>
-          <div className="pass-type-wrap">
-            <span className="pass-category" style={{ borderColor: `${accentColor}30`, color: accentColor }}>
+          <View style={styles.header}>
+            <View style={styles.brandRow}>
+              <View style={[styles.markIcon, { borderColor: `${accentColor}60`, backgroundColor: `${accentColor}30` }]}>
+                <Text style={[styles.markText, { color: accentColor }]}>{credential.mark}</Text>
+              </View>
+              <Text style={styles.issuerName}>
+                {masked ? '••••••••' : credential.issuer}
+              </Text>
+            </View>
+            {onTemplateChange && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Personalizar credencial"
+                style={styles.settingsButton}
+                onPress={(event) => {
+                  event.stopPropagation();
+                  setShowTemplates(true);
+                }}
+              >
+                <AppIcon name="gearshape" size={17} tintColor={accentColor} />
+                <Text style={[styles.settingsText, { color: accentColor }]}>Personalizar</Text>
+              </Pressable>
+            )}
+          </View>
+
+          <View style={styles.body}>
+            <Text style={[styles.type, { color: accentColor }]} numberOfLines={1}>
               {credential.badge || credential.type}
-            </span>
-            <ContactlessIcon size={14} color={accentColor} />
-          </div>
-        </div>
+            </Text>
+            <Text style={styles.title} numberOfLines={2}>
+              {masked ? '•••• ••••' : credential.title}
+            </Text>
+            <Text style={styles.issuerDetail} numberOfLines={1}>
+              {masked ? 'Emisor oculto' : credential.issuer}
+            </Text>
+          </View>
 
-        {/* Main Content */}
-        <div className="pass-body">
-          <h3 className="pass-title">{masked ? '•••• ••••' : credential.title}</h3>
-        </div>
-
-        {/* Bottom Footer */}
-        <div className="pass-footer">
-          <div className="pass-number-box">
-            <span className="pass-number" style={{ color: accentColor }}>
-              {masked ? '•••• ••••' : (credential.cardNumber || `•••• ${credential.id.slice(0, 4)}`)}
-            </span>
-            <span className="pass-validity">
-              {masked ? '•• / ••' : `HASTA ${credential.validUntil.toUpperCase()}`}
-            </span>
-          </div>
-          {/* Settings gear — only shows on hover via CSS */}
-          {onTemplateChange && (
-            <button className="card-settings-btn" onClick={handleGear} aria-label="Personalizar diseño">
-              ⚙
-            </button>
-          )}
-        </div>
-      </div>
+          <View style={styles.footer}>
+            <View style={styles.statusRow}>
+              <View style={styles.statusDot} />
+              <Text style={styles.validity}>
+                {masked ? 'Estado oculto' : `Válida hasta ${credential.validUntil}`}
+              </Text>
+            </View>
+            <Text style={styles.credentialMark}>{credential.mark}</Text>
+          </View>
+        </LinearGradient>
+      </Pressable>
 
       {showTemplates && (
         <TemplateSelector
@@ -110,3 +101,128 @@ export function AppleWalletCard({
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    width: '100%',
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.four,
+    minHeight: 180,
+    justifyContent: 'space-between',
+    overflow: 'hidden',
+  },
+  pressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  gloss: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '50%',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  markIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  markText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  issuerName: {
+    color: 'rgba(255,255,255,0.85)',
+    fontFamily: Fonts.sans,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  categoryWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
+  },
+  settingsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.one,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(0,0,0,0.16)',
+  },
+  settingsText: {
+    fontFamily: Fonts.sans,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  body: {
+    paddingVertical: Spacing.one,
+  },
+  title: {
+    color: '#FFFFFF',
+    fontFamily: Fonts.sans,
+    fontSize: 22,
+    fontWeight: '700',
+    lineHeight: 28,
+  },
+  type: {
+    fontFamily: Fonts.mono,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: Spacing.one,
+  },
+  issuerDetail: {
+    color: 'rgba(255,255,255,0.72)',
+    fontFamily: Fonts.sans,
+    fontSize: 13,
+    marginTop: Spacing.one,
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
+  },
+  statusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#7DDB8A',
+  },
+  validity: {
+    color: 'rgba(255,255,255,0.7)',
+    fontFamily: Fonts.sans,
+    fontSize: 11,
+  },
+  credentialMark: {
+    color: 'rgba(255,255,255,0.82)',
+    fontFamily: Fonts.mono,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+});

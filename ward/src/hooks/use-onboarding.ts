@@ -22,32 +22,39 @@ export function useOnboarding() {
     return () => clearTimeout(timer);
   }, [step]);
 
-  const goToBiometria = () => setStep('biometria');
+  // Automatic ready timeout to role selection
+  useEffect(() => {
+    if (step !== 'ready') return;
+    const timer = setTimeout(() => setStep('role-selection'), 900);
+    return () => clearTimeout(timer);
+  }, [step]);
+
   const goToWarning = () => setStep('warning');
   const goToCreating = () => setStep('creating');
-  const goToRol = () => setStep('rol');
-  const goToIdentity = () => setStep('identity');
+  const goToAlias = () => setStep('alias');
+
+  const goToRoleSelection = () => setStep('role-selection');
+  const goToWallet = () => setStep('wallet');
 
   const completeOnboarding = () => {
     storageService.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, 'true');
-    setStep('wallet');
+    setStep('role-selection');
   };
 
   const enterDemo = (onDemoEntered?: () => void) => {
-    // If skipping to demo, set a default alias so they have one
     storageService.setItem('ward.user_alias', 'demo.user');
     storageService.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, 'true');
     onDemoEntered?.();
-    setStep('wallet');
+    setStep('role-selection');
   };
 
   return {
     step,
-    goToBiometria,
     goToWarning,
     goToCreating,
-    goToRol,
-    goToIdentity,
+    goToAlias,
+    goToRoleSelection,
+    goToWallet,
     completeOnboarding,
     enterDemo,
   };

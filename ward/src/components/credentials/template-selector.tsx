@@ -1,5 +1,9 @@
 import React from 'react';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { CARD_TEMPLATES, CardTemplate } from '@/constants/card-templates';
+import { AppIcon } from '@/components/ui/app-icon';
+import { colors, Spacing, BorderRadius, Fonts } from '@/constants/theme';
 
 type TemplateSelectorProps = {
   currentId?: string;
@@ -9,27 +13,100 @@ type TemplateSelectorProps = {
 
 export function TemplateSelector({ currentId, onSelect, onClose }: TemplateSelectorProps) {
   return (
-    <div className="template-overlay" onClick={onClose}>
-      <div className="template-panel" onClick={(e) => e.stopPropagation()}>
-        <div className="template-panel-header">
-          <span className="template-panel-title">Diseño de tarjeta</span>
-          <button className="template-close-btn" onClick={onClose} aria-label="Cerrar">✕</button>
-        </div>
-        <div className="template-grid">
-          {CARD_TEMPLATES.map((t) => (
-            <button
-              key={t.id}
-              className={`template-chip ${t.id === currentId ? 'selected' : ''}`}
-              style={{ background: t.gradient }}
-              onClick={() => onSelect(t)}
-              aria-label={`Template ${t.name}`}
-            >
-              <span className="template-chip-name" style={{ color: t.accent }}>{t.name}</span>
-              {t.id === currentId && <span className="template-chip-check" style={{ color: t.accent }}>✓</span>}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
+    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.overlay} onPress={onClose}>
+        <Pressable style={styles.panel} onPress={(e) => e.stopPropagation()}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Diseño de tarjeta</Text>
+            <Pressable style={styles.closeBtn} onPress={onClose}>
+              <AppIcon name="xmark" size={18} tintColor={colors.textSecondary} />
+            </Pressable>
+          </View>
+
+          <View style={styles.grid}>
+            {CARD_TEMPLATES.map((t) => (
+              <Pressable
+                key={t.id}
+                style={[styles.chip, t.id === currentId && styles.chipSelected]}
+                onPress={() => onSelect(t)}
+              >
+                <LinearGradient
+                  colors={t.gradient.colors}
+                  start={t.gradient.start}
+                  end={t.gradient.end}
+                  style={styles.chipGradient}
+                >
+                  <Text style={styles.chipName}>{t.name}</Text>
+                  {t.id === currentId && (
+                    <AppIcon name="checkmark.circle.fill" size={14} tintColor="#FFFFFF" />
+                  )}
+                </LinearGradient>
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'flex-end',
+  },
+  panel: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+    padding: Spacing.four,
+    gap: Spacing.three,
+    borderTopWidth: 1,
+    borderColor: colors.border,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  title: {
+    color: colors.text,
+    fontFamily: Fonts.sans,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  closeBtn: {
+    padding: Spacing.one,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.two,
+    paddingVertical: Spacing.two,
+  },
+  chip: {
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  chipGradient: {
+    minWidth: 112,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.one,
+  },
+  chipSelected: {
+    borderColor: colors.accent,
+  },
+  chipName: {
+    fontFamily: Fonts.sans,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+});

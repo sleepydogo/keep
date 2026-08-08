@@ -8,7 +8,6 @@
   },
   "workspaces": [
     "contract",
-    "ward",
     "keep"
   ],
   "scripts": {
@@ -19,9 +18,8 @@
     "dev": "concurrently -k -i --default-input-target ward -n api,web,ward -c green,magenta,cyan npm:dev:api npm:dev:web npm:dev:ward",
     "dev:api": "npm run dev:api -w @keep/web",
     "dev:web": "npm run dev:ui -w @keep/web",
-    "dev:ward": "npm run start -w ward.app -- --port 5173",
-    "test": "npm run ci -w @keep/contract",
-    "nodo": "npm run nodo -w @keep/contract"
+    "dev:ward": "npm run --prefix ward start -- --port 5173",
+    "test": "npm run ci -w @keep/contract"
   },
   "devDependencies": {
     "@typescript-eslint/parser": "^8.61.0",
@@ -32,11 +30,6 @@
     "prettier": "^3.8.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.61.0"
-  },
-  "overrides": {
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "@midnight-ntwrk/onchain-runtime-v3": "3.0.0"
   },
   "allowScripts": {
     "classic-level@3.0.0": true,

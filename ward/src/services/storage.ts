@@ -1,6 +1,7 @@
 export const STORAGE_KEYS = {
   ONBOARDING_COMPLETED: 'ward.onboarding.completed',
   CREDENTIAL_ORDER: 'ward.credential.order',
+  USER_ALIAS: 'ward.user_alias',
 } as const;
 
 export const storageService = {
