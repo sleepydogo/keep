@@ -8,8 +8,14 @@ import { conectar, env } from "./red.js";
 
 // El puente que el teléfono no puede ser: WARD no bundlea el WASM de Midnight,
 // así que la parte de cadena — probar, firmar, leer el ledger — vive acá.
+// Las suscripciones WebSocket de la wallet se caen solas; sin esto una promesa
+// rechazada afuera de un handler mata el proceso en medio de la demo.
+process.on("unhandledRejection", (e) => console.error("unhandledRejection", e));
+process.on("uncaughtException", (e) => console.error("uncaughtException", e));
+
 const PUERTO = Number(process.env["KEEP_NODO_PUERTO"] ?? 5176);
-const CES_URL = process.env["KEEP_CES_URL"] ?? "http://localhost:3000";
+// Vacío = la wallet del nodo paga el DUST. Con URL = lo patrocina el CES.
+const CES_URL = process.env["KEEP_CES_URL"] ?? "";
 const contractAddress = env("VITE_CONTRACT_ADDRESS");
 
 const hex = (b: Uint8Array) =>
@@ -34,25 +40,36 @@ const aCredencial = (p: PaqueteQr): Credencial => ({
   },
 });
 
-const { wallet, providers, estado } = await conectar({
-  seedVar: "VITE_HOLDER_SEED",
-  exigirDust: false,
+// El puerto abre YA. Sincronizar la wallet tarda, y si esperáramos acá el
+// puerto no existiría mientras tanto: desde afuera se ve igual que un proceso
+// muerto. Las rutas que la necesitan esperan a esta promesa.
+let listo = false;
+const conexion = conectar({ seedVar: "VITE_HOLDER_SEED", exigirDust: false });
+conexion.then(() => {
+  listo = true;
+  console.log("Wallet sincronizada. Nodo operativo.");
 });
 
-const patrocinados = {
-  ...providers,
-  walletProvider: sponsoredTransactionsWalletProvider({
-    coinPublicKey: estado.shielded.coinPublicKey.toHexString(),
-    encryptionPublicKey: estado.shielded.encryptionPublicKey.toHexString(),
-    capacityExchangeUrl: CES_URL,
-  }),
+const patrocinados = async () => {
+  const { providers, estado } = await conexion;
+  if (!CES_URL) return providers;
+  return {
+    ...providers,
+    walletProvider: sponsoredTransactionsWalletProvider({
+      coinPublicKey: estado.shielded.coinPublicKey.toHexString(),
+      encryptionPublicKey: estado.shielded.encryptionPublicKey.toHexString(),
+      capacityExchangeUrl: CES_URL,
+    }),
+  };
 };
 
-const estadoLedger = async () =>
-  ledger(
+const estadoLedger = async () => {
+  const { providers } = await conexion;
+  return ledger(
     (await providers.publicDataProvider.queryContractState(contractAddress))!
       .data,
   );
+};
 
 const cuerpo = (req: IncomingMessage) =>
   new Promise<any>((res, rej) => {
@@ -68,6 +85,8 @@ const cuerpo = (req: IncomingMessage) =>
   });
 
 const rutas: Record<string, (req: IncomingMessage, m: string[]) => Promise<unknown>> = {
+  "GET /estado": async () => ({ listo, ces: CES_URL || null, contractAddress }),
+
   // El verificador arma el pedido y se lleva la clave donde va a leer la respuesta.
   "POST /pedido": async (req) => {
     const { emisorId } = await cuerpo(req);
@@ -95,7 +114,7 @@ const rutas: Record<string, (req: IncomingMessage, m: string[]) => Promise<unkno
   // en el diseño real esto pasa en el teléfono.
   "POST /presentar": async (req) => {
     const b = await cuerpo(req);
-    const contrato = await findDeployedContract(patrocinados, {
+    const contrato = await findDeployedContract(await patrocinados(), {
       compiledContract: CompiledKeepContract,
       contractAddress,
       privateStateId: `keep-${b.nonce}`,
@@ -147,8 +166,12 @@ createServer(async (req, res) => {
   }
   responder(res, 404, { error: "no existe" });
 }).listen(PUERTO, () => {
-  console.log(`Nodo KEEP  http://localhost:${PUERTO}`);
+  console.log(`Nodo KEEP  http://localhost:${PUERTO}  (escuchando ya)`);
   console.log(`Contrato   ${contractAddress}`);
+  console.log(`Paga       ${CES_URL || "la wallet del nodo (sin CES)"}`);
+  console.log("Sincronizando wallet… GET /estado dice cuándo está lista.");
 });
 
-process.on("SIGINT", () => void wallet.stop().then(() => process.exit(0)));
+process.on("SIGINT", () => {
+  void conexion.then((c) => c.wallet.stop()).finally(() => process.exit(0));
+});

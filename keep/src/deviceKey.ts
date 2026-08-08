@@ -48,8 +48,13 @@ export const ensureDeviceKey = async (
   userId: string,
   register: (emisor: EmisorJubjub) => Promise<void>,
 ): Promise<EmisorJubjub> => {
+  // El emisor de la demo: el mismo secreto que registró `npm run registrar`.
+  // Sin esto cada navegador inventa un emisorId que no está on-chain y las
+  // presentaciones fallan con "Emisor no registrado".
+  const delEnv = import.meta.env["VITE_EMISOR_SECRET"] as string | undefined;
+
   const clave = `user:${userId}`;
-  let hex = await idb<string | undefined>("readonly", (s) => s.get(clave));
+  let hex = delEnv || (await idb<string | undefined>("readonly", (s) => s.get(clave)));
 
   if (!hex) {
     hex = toHex(crypto.getRandomValues(new Uint8Array(32)));

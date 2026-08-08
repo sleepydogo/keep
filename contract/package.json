@@ -24,7 +24,8 @@
     "lint": "eslint src",
     "test": "vitest run",
     "ci": "npm run compact && npm run typecheck && npm run lint && npm run build && npm run test",
-    "nodo": "npm run build && node --env-file-if-exists=../.env dist/servidor.js"
+    "nodo": "npm run build && node --env-file-if-exists=../.env dist/servidor.js",
+    "emitir-demo": "npm run build && node --env-file-if-exists=../.env dist/emitirDemo.js"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
