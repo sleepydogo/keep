@@ -1,56 +1,69 @@
-import { WalletScreen } from '@/components/web/wallet-screen.web';
+import { WalletScreen } from '@/components/wallet-screen';
+import { VerifierScreen } from '@/components/verifier-screen';
+import { IdScreen } from '@/components/id-screen';
+import { SettingsScreen } from '@/components/settings-screen';
 import { OnboardingFlow } from '@/components/onboarding/onboarding-flow';
-import { PendingScreen } from '@/components/credentials/pending-screen';
-import { AddedScreen } from '@/components/credentials/added-screen';
 import { DetailScreen } from '@/components/credentials/detail-screen';
 import { ShowScreen } from '@/components/credentials/show-screen';
 import { useOnboarding } from '@/hooks/use-onboarding';
 import { useCredentials } from '@/hooks/use-credentials';
+import { useRol } from '@/hooks/use-rol';
+import type { Rol } from '@/services/rol';
 
 export default function HomeScreen() {
   const {
     step,
+    goToBiometria,
     goToWarning,
     goToCreating,
-    goToAlias,
-    finishCreating,
+    goToRol,
+    goToIdentity,
     completeOnboarding,
     enterDemo,
   } = useOnboarding();
   const {
     screen,
     selected,
-    accepted,
-    pending,
     credentials,
     openCredential,
-    acceptPending,
-    viewPendingDetail,
     goToWallet,
     goToDetail,
-    enableDemoAccepted,
+    goToId,
+    goToSettings,
   } = useCredentials();
+  const { rol, setRol } = useRol();
+
+  // El verificador no maneja secretos: no necesita crear identidad.
+  const elegirRol = async (r: Rol) => {
+    await setRol(r);
+    if (r === 'verificador') completeOnboarding();
+    else goToIdentity();
+  };
 
   if (step !== 'wallet') {
     return (
       <OnboardingFlow
         step={step}
-        onContinue={goToWarning}
-        onConfirm={goToAlias}
-        onCompleteAlias={goToCreating}
-        onCreatingDone={finishCreating}
+        onContinue={goToBiometria}
+        onBiometriaLista={goToWarning}
+        onConfirm={goToRol}
+        onElegirRol={elegirRol}
+        onCompleteIdentity={goToCreating}
         onReady={completeOnboarding}
-        onEnterDemo={() => enterDemo(enableDemoAccepted)}
+        onEnterDemo={() => enterDemo()}
       />
     );
   }
 
+  if (screen === 'settings')
+    return <SettingsScreen onBack={goToWallet} rol={rol} onCambiarRol={setRol} />;
+
+  if (rol === 'verificador')
+    return <VerifierScreen onSettings={goToSettings} />;
+
   switch (screen) {
-    case 'pending':
-      return <PendingScreen onAccept={acceptPending} onBack={goToWallet} />;
-    case 'added':
-      return <AddedScreen credential={credentials[0]} onBack={goToWallet} />;
     case 'detail':
+      if (!selected) break;
       return (
         <DetailScreen
           credential={selected}
@@ -60,17 +73,18 @@ export default function HomeScreen() {
         />
       );
     case 'show':
+      if (!selected) break;
       return <ShowScreen credential={selected} onBack={goToDetail} />;
-    case 'wallet':
-    default:
-      return (
-        <WalletScreen
-          key={accepted ? 'accepted' : 'pending'}
-          credentials={credentials}
-          pending={pending}
-          onOpen={openCredential}
-          onAcceptPending={acceptPending}
-        />
-      );
+    case 'id':
+      return <IdScreen onBack={goToWallet} />;
   }
+
+  return (
+    <WalletScreen
+      credentials={credentials}
+      onOpen={openCredential}
+      onShowId={goToId}
+      onSettings={goToSettings}
+    />
+  );
 }

@@ -22,9 +22,11 @@ export function useOnboarding() {
     return () => clearTimeout(timer);
   }, [step]);
 
+  const goToBiometria = () => setStep('biometria');
   const goToWarning = () => setStep('warning');
   const goToCreating = () => setStep('creating');
-  const goToAlias = () => setStep('alias');
+  const goToRol = () => setStep('rol');
+  const goToIdentity = () => setStep('identity');
 
   const completeOnboarding = () => {
     storageService.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, 'true');
@@ -41,9 +43,11 @@ export function useOnboarding() {
 
   return {
     step,
+    goToBiometria,
     goToWarning,
     goToCreating,
-    goToAlias,
+    goToRol,
+    goToIdentity,
     completeOnboarding,
     enterDemo,
   };

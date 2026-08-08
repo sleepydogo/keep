@@ -1009,3 +1009,12 @@ button {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+
+.vacio {
+  border: 1px solid #DED6C8;
+  border-radius: 12px;
+  padding: 24px;
+}
+.vacio strong { display: block; font-size: 22px; margin-bottom: 8px; }
+.vacio p { color: #6B6659; font-size: 14px; line-height: 21px; margin: 0; }

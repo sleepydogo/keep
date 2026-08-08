@@ -18,7 +18,7 @@ export type Credential = {
   templateId?: string;
 };
 
-export type OnboardingStep = 'splash' | 'welcome' | 'warning' | 'creating' | 'ready' | 'alias' | 'wallet';
+export type OnboardingStep = 'splash' | 'welcome' | 'biometria' | 'warning' | 'rol' | 'creating' | 'ready' | 'identity' | 'wallet';
 
-export type Screen = 'wallet' | 'pending' | 'added' | 'detail' | 'show';
+export type Screen = 'wallet' | 'detail' | 'show' | 'id' | 'settings';
 
