@@ -22,7 +22,7 @@ export function ReadyStep({ onReady }: ReadyStepProps) {
           Ahora podés recibir y guardar tus credenciales en WARD.
         </Text>
       </View>
-      <Button label="Ir a mi tarjetero" onPress={onReady} />
+      <Button label="Continuar" onPress={onReady} />
     </OnboardingLayout>
   );
 }

@@ -1,138 +1,223 @@
 import React, { useEffect, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AppleWalletCard } from '@/components/credentials/apple-wallet-card';
 import { useCredentialOrder } from '@/hooks/use-credential-order';
 import { useCardCustomisation } from '@/hooks/use-card-customisation';
+import { Colors, Fonts, Spacing } from '@/constants/theme';
 import type { Credential } from '@/types/credential';
+import { storageService, STORAGE_KEYS } from '@/services/storage';
 
 type WalletScreenProps = {
   credentials: Credential[];
   pending?: Credential;
   onOpen: (credential: Credential) => void;
   onAcceptPending?: () => void;
+  onSwitchMode?: () => void;
 };
+
+const colors = Colors.light;
 
 export function WalletScreen({
   credentials,
   pending,
   onOpen,
   onAcceptPending,
+  onSwitchMode,
 }: WalletScreenProps) {
-  const reduceMotion = useReducedMotion();
-  const { items, draggingId } = useCredentialOrder(credentials);
+  const { items } = useCredentialOrder(credentials);
   const { masked, toggleMask, templateMap, setTemplate } = useCardCustomisation();
   const [alias, setAlias] = useState('joaquin.night');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedAlias = localStorage.getItem('ward.user_alias');
-      if (savedAlias) {
-        setAlias(savedAlias);
-      }
+    const savedAlias = storageService.getItem(STORAGE_KEYS.USER_ALIAS);
+    if (savedAlias) {
+      setAlias(savedAlias);
     }
   }, []);
 
   return (
-    <main className="wallet-shell">
-      {/* ── Header ──────────────────────────────────────── */}
-      <header className="wallet-header">
-        <div className="wallet-brand">
-          <span>WARD</span>
-          <i />
-        </div>
-        <div className="wallet-header-actions">
-          <span className="wallet-alias">@{alias}</span>
-          {/* Eye — toggle privacy mask */}
-          <button
-            className="header-icon-btn"
-            onClick={toggleMask}
-            aria-label={masked ? 'Mostrar datos' : 'Ocultar datos'}
-            title={masked ? 'Mostrar datos' : 'Ocultar datos'}
-          >
-            {masked ? (
-              // Eye-off
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
-              </svg>
-            ) : (
-              // Eye-open
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
+    <ScrollView contentContainerStyle={styles.scrollContent}>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.brandRow}>
+            <Text style={styles.brandText}>WARD</Text>
+            <View style={styles.brandDot} />
+          </View>
+
+          <View style={styles.headerActions}>
+            <Text style={styles.aliasText}>@{alias}</Text>
+
+            {onSwitchMode && (
+              <Pressable style={styles.modeBtn} onPress={onSwitchMode}>
+                <Text style={styles.modeBtnText}>KEEP</Text>
+              </Pressable>
             )}
-          </button>
-        </div>
-      </header>
 
-      {/* ── Pending credential notification ─────────────── */}
-      <AnimatePresence>
+            <Pressable style={styles.iconBtn} onPress={toggleMask}>
+              <Text style={styles.iconText}>{masked ? '🙈' : '👁'}</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Pending credential banner */}
         {pending && onAcceptPending && (
-          <motion.section
-            key="pending"
-            className="pending-section"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25 }}
-          >
-            <article className="pending-card">
-              <span className="pending-mark" style={{ backgroundColor: pending.tone }}>
-                {pending.mark}
-              </span>
-              <div className="pending-copy">
-                <small>Nueva credencial</small>
-                <strong>{pending.title}</strong>
-              </div>
-              <button className="review-button" onClick={onAcceptPending}>
-                Agregar
-              </button>
-            </article>
-          </motion.section>
+          <View style={styles.pendingCard}>
+            <View style={[styles.pendingMark, { backgroundColor: pending.tone || colors.action }]}>
+              <Text style={styles.pendingMarkText}>{pending.mark || '★'}</Text>
+            </View>
+            <View style={styles.pendingCopy}>
+              <Text style={styles.pendingKicker}>Nueva credencial</Text>
+              <Text style={styles.pendingTitle}>{pending.title}</Text>
+            </View>
+            <Pressable style={styles.acceptBtn} onPress={onAcceptPending}>
+              <Text style={styles.acceptBtnText}>Agregar</Text>
+            </Pressable>
+          </View>
         )}
-      </AnimatePresence>
 
-      {/* ── Card list ────────────────────────────────────── */}
-      <section>
-        <div className="apple-wallet-list">
-          {items.map((credential, index) => {
-            // Merge template override into credential object
+        {/* Cards List */}
+        <View style={styles.cardsList}>
+          {items.map((credential) => {
             const enriched: Credential = templateMap[credential.id]
               ? { ...credential, templateId: templateMap[credential.id] }
               : credential;
 
             return (
-              <motion.div
+              <AppleWalletCard
                 key={credential.id}
-                data-credential-id={credential.id}
-                layout={!reduceMotion}
-                initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8, scale: 0.97 }}
-                transition={{
-                  delay: index * 0.055,
-                  duration: 0.28,
-                  layout: {
-                    type: 'spring',
-                    stiffness: 340,
-                    damping: 30,
-                    mass: 0.9,
-                  },
-                }}
-                className={`apple-wallet-item-row${draggingId === credential.id ? ' is-dragging' : ''}`}
-              >
-                <AppleWalletCard
-                  credential={enriched}
-                  masked={masked}
-                  onClick={() => onOpen(credential)}
-                  onTemplateChange={(tid) => setTemplate(credential.id, tid)}
-                />
-              </motion.div>
+                credential={enriched}
+                masked={masked}
+                onClick={() => onOpen(credential)}
+                onTemplateChange={(tid) => setTemplate(credential.id, tid)}
+              />
             );
           })}
-        </div>
-      </section>
-    </main>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    padding: Spacing.four,
+  },
+  container: {
+    width: '100%',
+    maxWidth: 480,
+    gap: Spacing.four,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: Spacing.two,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
+  },
+  brandText: {
+    color: colors.text,
+    fontFamily: Fonts.sans,
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 3,
+  },
+  brandDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: colors.action,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  aliasText: {
+    color: colors.textSecondary,
+    fontFamily: Fonts.mono,
+    fontSize: 12,
+  },
+  modeBtn: {
+    backgroundColor: colors.backgroundElement,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.half,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  modeBtnText: {
+    color: colors.textSecondary,
+    fontFamily: Fonts.mono,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  iconBtn: {
+    padding: Spacing.one,
+  },
+  iconText: {
+    fontSize: 18,
+  },
+  pendingCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.backgroundElement,
+    borderRadius: 16,
+    padding: Spacing.three,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: Spacing.two,
+  },
+  pendingMark: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pendingMarkText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  pendingCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  pendingKicker: {
+    color: colors.action,
+    fontFamily: Fonts.mono,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  pendingTitle: {
+    color: colors.text,
+    fontFamily: Fonts.sans,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  acceptBtn: {
+    backgroundColor: colors.action,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.one,
+    borderRadius: 10,
+  },
+  acceptBtnText: {
+    color: '#FFFFFF',
+    fontFamily: Fonts.sans,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  cardsList: {
+    gap: Spacing.two,
+  },
+});

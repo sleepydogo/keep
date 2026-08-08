@@ -34,6 +34,8 @@ export function useCredentialOrder(credentials: Credential[]) {
   }
 
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+
     const cleanups = items.map((item) => {
       const element = document.querySelector<HTMLElement>(`[data-credential-id="${item.id}"]`);
       if (!element) return () => {};
