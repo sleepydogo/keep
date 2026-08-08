@@ -7,7 +7,7 @@ export default function VerifierRoute() {
   return (
     <VerifierHomeScreen
       isOnline
-      onScan={() => router.push('/verifier/scanning')}
+      onScan={() => router.push('/verifier/scanning' as any)}
       onSwitchMode={() => router.replace('/')}
     />
   );

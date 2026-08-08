@@ -55,7 +55,9 @@
             "statusBarHidden": true
           }
         }
-      ]
+      ],
+      "expo-secure-store",
+      "expo-local-authentication"
     ],
     "experiments": {
       "typedRoutes": true

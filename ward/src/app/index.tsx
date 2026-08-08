@@ -1,7 +1,5 @@
 import { WalletScreen } from '@/components/credentials/wallet-screen';
 import { OnboardingFlow } from '@/components/onboarding/onboarding-flow';
-import { PendingScreen } from '@/components/credentials/pending-screen';
-import { AddedScreen } from '@/components/credentials/added-screen';
 import { DetailScreen } from '@/components/credentials/detail-screen';
 import { ShowScreen } from '@/components/credentials/show-screen';
 import { RoleSelectionScreen } from '@/components/role-selection-screen';
@@ -12,10 +10,8 @@ import { VerifierResultScreen } from '@/components/verifier/verifier-result-scre
 import { useOnboarding } from '@/hooks/use-onboarding';
 import { useCredentials } from '@/hooks/use-credentials';
 import { useAppMode } from '@/hooks/use-app-mode';
-import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
-  const router = useRouter();
   const {
     step,
     goToWarning,
@@ -28,14 +24,10 @@ export default function HomeScreen() {
   const {
     screen,
     selected,
-    accepted,
-    pending,
     credentials,
     openCredential,
-    acceptPending,
     goToWallet,
     goToDetail,
-    enableDemoAccepted,
   } = useCredentials();
   const {
     mode,
@@ -68,7 +60,7 @@ export default function HomeScreen() {
         onConfirm={goToAlias}
         onCompleteAlias={goToCreating}
         onReady={completeOnboarding}
-        onEnterDemo={() => enterDemo(enableDemoAccepted)}
+        onEnterDemo={() => enterDemo()}
       />
     );
   }
@@ -93,11 +85,8 @@ export default function HomeScreen() {
   }
 
   switch (screen) {
-    case 'pending':
-      return <PendingScreen onAccept={acceptPending} onBack={goToWallet} />;
-    case 'added':
-      return <AddedScreen credential={credentials[0]} onBack={goToWallet} />;
     case 'detail':
+      if (!selected) return null;
       return (
         <DetailScreen
           credential={selected}
@@ -107,21 +96,17 @@ export default function HomeScreen() {
         />
       );
     case 'show':
+      if (!selected) return null;
       return <ShowScreen credential={selected} onBack={goToDetail} />;
     case 'wallet':
     default:
       return (
         <WalletScreen
-          key={accepted ? 'accepted' : 'pending'}
+          key="wallet"
           credentials={credentials}
-          pending={pending}
-           onOpen={(credential) =>
-             router.push({ pathname: '/wallet/[id]', params: { id: credential.id } })
-           }
-          onAcceptPending={acceptPending}
+           onOpen={(credential) => openCredential(credential)}
            onSwitchMode={() => {
              switchMode('verifier');
-             router.push('/verifier');
            }}
         />
       );

@@ -7,7 +7,7 @@ export default function VerifierScanningRoute() {
   return (
     <VerifierScanningScreen
       onBack={() => router.back()}
-      onProcessed={() => router.replace('/verifier/checking')}
+      onProcessed={() => router.replace('/verifier/checking' as any)}
     />
   );
 }

@@ -8,7 +8,7 @@ export default function VerifierCheckingRoute() {
     <VerifierCheckingScreen
       isOnline
       onBack={() => router.back()}
-      onResult={(result) => router.replace(`/verifier/result?variant=${result}`)}
+      onResult={(result) => router.replace(`/verifier/result?variant=${result}` as any)}
     />
   );
 }

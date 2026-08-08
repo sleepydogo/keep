@@ -42,6 +42,7 @@ export type PureCircuits = {
   claveFirmaEmisor(secreto_0: Uint8Array): Uint8Array;
   derivarEmisorId(secreto_0: Uint8Array): Uint8Array;
   hojaVencimiento(fechaVencimiento_0: bigint): bigint;
+  holderIdPublico(holderSecret_0: Uint8Array): Uint8Array;
   holderId(holderSecret_0: Uint8Array): bigint;
   schnorrChallenge(ann_x_0: bigint,
                    ann_y_0: bigint,
@@ -66,6 +67,8 @@ export type Circuits<PS> = {
                   secreto_0: Uint8Array): __compactRuntime.CircuitResults<PS, Uint8Array>;
   hojaVencimiento(context: __compactRuntime.CircuitContext<PS>,
                   fechaVencimiento_0: bigint): __compactRuntime.CircuitResults<PS, bigint>;
+  holderIdPublico(context: __compactRuntime.CircuitContext<PS>,
+                  holderSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, Uint8Array>;
   holderId(context: __compactRuntime.CircuitContext<PS>,
            holderSecret_0: Uint8Array): __compactRuntime.CircuitResults<PS, bigint>;
   schnorrChallenge(context: __compactRuntime.CircuitContext<PS>,

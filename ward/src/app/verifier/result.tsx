@@ -8,8 +8,8 @@ export default function VerifierResultRoute() {
   return (
     <VerifierResultScreen
       variant={variant === 'invalid' || variant === 'offline' ? variant : 'valid'}
-      onDone={() => router.replace('/verifier')}
-      onScanAgain={() => router.replace('/verifier/scanning')}
+      onDone={() => router.replace('/verifier' as any)}
+      onScanAgain={() => router.replace('/verifier/scanning' as any)}
     />
   );
 }
