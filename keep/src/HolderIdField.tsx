@@ -32,11 +32,17 @@ export const HolderIdField = ({ value, onChange, valido }: Props) => {
   }, [modo]);
 
   return (
-    <label>
-      Código del destinatario
-      <div className="toggle">
+    <div className="holder-id-field">
+      <div className="field-label-row">
+        <label htmlFor="holderId">Código del destinatario</label>
+        <span className="field-required">Obligatorio</span>
+      </div>
+      <p className="field-description">Usá el código de 64 caracteres que aparece en WARD.</p>
+      <div className="toggle" role="tablist" aria-label="Método de carga">
         <button
           type="button"
+          role="tab"
+          aria-selected={modo === "pegar"}
           className={modo === "pegar" ? "on" : ""}
           onClick={() => setModo("pegar")}
         >
@@ -44,6 +50,8 @@ export const HolderIdField = ({ value, onChange, valido }: Props) => {
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={modo === "camara"}
           className={modo === "camara" ? "on" : ""}
           onClick={() => setModo("camara")}
         >
@@ -54,6 +62,7 @@ export const HolderIdField = ({ value, onChange, valido }: Props) => {
       {modo === "pegar" ? (
         <input
           type="text"
+          id="holderId"
           name="holderId"
           placeholder="64 caracteres hex, del QR de WARD"
           value={value}
@@ -66,7 +75,7 @@ export const HolderIdField = ({ value, onChange, valido }: Props) => {
         <video ref={video} className="camara" muted playsInline />
       )}
 
-      <span className={valido ? "hint ok" : "hint"}>
+      <span className={valido ? "hint ok holder-status" : "hint holder-status"}>
         {error ||
           (value === ""
             ? "Pegá el código de WARD o escaneá su QR."
@@ -74,6 +83,6 @@ export const HolderIdField = ({ value, onChange, valido }: Props) => {
               ? "Código válido."
               : "Tiene que ser hexadecimal de 64 caracteres.")}
       </span>
-    </label>
+    </div>
   );
 };

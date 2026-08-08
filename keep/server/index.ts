@@ -63,9 +63,9 @@ app.post("/api/register", (req, res) => {
     .toLowerCase();
   const password = String(req.body?.password ?? "");
 
-  if (!orgName || !username || password.length < 6) {
+  if (!orgName || !username || password.length < 8) {
     res.status(400).json({
-      error: "Completá institución, usuario y contraseña (mín. 6).",
+      error: "Completá institución, usuario y contraseña (mín. 8).",
     });
     return;
   }
@@ -209,6 +209,46 @@ app.get("/api/devices", (req, res) => {
     .all(user.org_id);
 
   res.json({ devices });
+});
+
+app.post("/api/credentials", (req, res) => {
+  const user = getUserBySession(req.cookies?.[COOKIE]);
+  if (!user) {
+    res.status(401).json({ error: "No autenticado." });
+    return;
+  }
+
+  const alias = String(req.body?.alias ?? "").trim();
+  const recipientAddress = String(req.body?.destinatario ?? "").trim();
+  const addressType = String(req.body?.addressType ?? "").trim();
+  const type = String(req.body?.tipo ?? "").trim();
+  const title = String(req.body?.titulo ?? "").trim();
+  const description = String(req.body?.descripcion ?? "").trim();
+  const expiresAt = req.body?.expiraEl ? String(req.body.expiraEl) : null;
+  const validityDays = req.body?.diasValidez == null ? null : Number(req.body.diasValidez);
+  const issuerId = String(req.body?.emisorId ?? "").trim();
+  const pk = req.body?.pk as { x?: string; y?: string } | undefined;
+
+  if (!alias || !recipientAddress || !type || !title || !issuerId || !pk?.x || !pk?.y) {
+    res.status(400).json({ error: "Completá los datos obligatorios de la credencial." });
+    return;
+  }
+
+  const id = randomUUID();
+  const createdAt = nowIso();
+  db.prepare(
+    `INSERT INTO credentials
+      (id, user_id, org_id, alias, recipient_address, address_type, type, title,
+       description, expires_at, validity_days, issuer_id, public_key, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  ).run(
+    id, user.id, user.org_id, alias, recipientAddress, addressType, type, title,
+    description, expiresAt, validityDays, issuerId, JSON.stringify(pk), createdAt,
+  );
+
+  res.status(201).json({
+    credential: { id, alias, titulo: title, tipo: type, expiraEl: expiresAt, createdAt },
+  });
 });
 
 app.listen(PORT, () => {

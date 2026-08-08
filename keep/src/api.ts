@@ -5,6 +5,15 @@ export type User = {
   orgName: string;
 };
 
+export type Credential = {
+  id: string;
+  alias: string;
+  titulo: string;
+  tipo: string;
+  expiraEl: string | null;
+  createdAt: string;
+};
+
 type ApiError = { error: string };
 
 const request = async <T>(
@@ -49,4 +58,19 @@ export const api = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+  emitCredential: (body: {
+    alias: string;
+    destinatario: string;
+    addressType: string;
+    tipo: string;
+    titulo: string;
+    descripcion: string;
+    expiraEl: string | null;
+    diasValidez: number | null;
+    emisorId: string;
+    pk: { x: string; y: string };
+  }) => request<{ credential: Credential }>("/api/credentials", {
+    method: "POST",
+    body: JSON.stringify(body),
+  }),
 };

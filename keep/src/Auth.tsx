@@ -7,13 +7,25 @@ type Props = {
   onAuth: (user: User) => void;
 };
 
+const DEMO_CREDENTIALS = { username: "demo", password: "demo1234" };
+
 export const Auth = ({ onAuth }: Props) => {
   const [mode, setMode] = useState<Mode>("login");
   const [orgName, setOrgName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const useDemoCredentials = () => {
+    setMode("login");
+    setUsername(DEMO_CREDENTIALS.username);
+    setPassword(DEMO_CREDENTIALS.password);
+    setError("");
+  };
+
+  const isDemo = import.meta.env.DEV;
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -36,8 +48,15 @@ export const Auth = ({ onAuth }: Props) => {
     <main className="page">
       <h1 className="brand-title">KEEP <i /></h1>
       <p className="subtitle">
-        {mode === "login" ? "Entrar a tu institución" : "Crear institución"}
+        {mode === "login"
+          ? "Credenciales verificables para tu institución"
+          : "Configurá una nueva institución emisora"}
       </p>
+      {mode === "login" && (
+        <p className="intro-copy">
+          Emití credenciales protegiendo los datos privados de cada destinatario.
+        </p>
+      )}
 
       <form className="form" onSubmit={onSubmit}>
         {mode === "register" && (
@@ -65,26 +84,34 @@ export const Auth = ({ onAuth }: Props) => {
             onChange={(e) => setUsername(e.target.value)}
             required
             autoComplete="username"
+            aria-invalid={Boolean(error)}
           />
         </label>
 
-        <label>
+        <label htmlFor="password">
           Contraseña
-          <input
-            type="password"
-            name="password"
-            placeholder="Mínimo 6 caracteres"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            autoComplete={
-              mode === "register" ? "new-password" : "current-password"
-            }
-          />
+          <span className="password-field">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Mínimo 8 caracteres"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete={
+                mode === "register" ? "new-password" : "current-password"
+              }
+              aria-invalid={Boolean(error)}
+            />
+            <button type="button" className="password-toggle" onClick={() => setShowPassword((value) => !value)} aria-pressed={showPassword}>
+              {showPassword ? "Ocultar" : "Mostrar"}
+            </button>
+          </span>
         </label>
 
-        {error && <p className="error">{error}</p>}
+        {error && <p className="error" role="alert">{error}</p>}
 
         <button type="submit" disabled={loading}>
           {loading
@@ -93,6 +120,12 @@ export const Auth = ({ onAuth }: Props) => {
               ? "Entrar"
               : "Crear institución"}
         </button>
+
+        {mode === "login" && isDemo && (
+          <button type="button" className="link demo-login" onClick={useDemoCredentials}>
+            Usar acceso de demostración
+          </button>
+        )}
       </form>
 
       <p className="switch">

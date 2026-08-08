@@ -62,7 +62,7 @@ export const EmitForm = ({ user, emisor, onLogout }: Props) => {
   };
 
   return (
-    <main className="page">
+    <main className="page app-page">
       <header className="topbar">
         <div>
           <h1 className="brand-title">KEEP <i /></h1>
@@ -75,8 +75,19 @@ export const EmitForm = ({ user, emisor, onLogout }: Props) => {
         </button>
       </header>
 
-      <p className="section-title">Nueva credencial</p>
+      <div className="section-heading">
+        <p className="eyebrow">Emisor institucional</p>
+        <h2>Nueva credencial</h2>
+        <p>Completá los datos para emitir una credencial verificable.</p>
+      </div>
 
+      <section className="form-panel">
+        <div className="panel-heading">
+          <div>
+            <h3>Datos de la credencial</h3>
+            <p>La información se firma localmente antes de generar el código.</p>
+          </div>
+        </div>
       <form className="form" onSubmit={onSubmit}>
         <HolderIdField
           value={holderId}
@@ -84,9 +95,10 @@ export const EmitForm = ({ user, emisor, onLogout }: Props) => {
           valido={idOk}
         />
 
-        <label>
+        <label htmlFor="tipo">
           Tipo de credencial
           <select
+            id="tipo"
             name="tipo"
             value={tipo}
             onChange={(e) => setTipo(e.target.value as TipoCredencial)}
@@ -99,9 +111,10 @@ export const EmitForm = ({ user, emisor, onLogout }: Props) => {
           </select>
         </label>
 
-        <label>
+        <label htmlFor="titulo">
           Título
           <input
+            id="titulo"
             type="text"
             name="titulo"
             placeholder="Título de la credencial"
@@ -111,9 +124,10 @@ export const EmitForm = ({ user, emisor, onLogout }: Props) => {
           />
         </label>
 
-        <label>
+        <label htmlFor="descripcion">
           Descripción
           <textarea
+            id="descripcion"
             name="descripcion"
             placeholder="Información adicional (opcional)"
             value={descripcion}
@@ -123,10 +137,11 @@ export const EmitForm = ({ user, emisor, onLogout }: Props) => {
         </label>
 
         {tipo === "recurrente" && (
-          <label>
+          <label htmlFor="diasValidez">
             Días de validez
             <input
               type="number"
+              id="diasValidez"
               name="diasValidez"
               min={1}
               step={1}
@@ -139,10 +154,11 @@ export const EmitForm = ({ user, emisor, onLogout }: Props) => {
         )}
 
         {tipo === "un_solo_uso" && (
-          <label>
+          <label htmlFor="expiraEl">
             Expira el
             <input
               type="date"
+              id="expiraEl"
               name="expiraEl"
               value={expiraEl}
               onChange={(e) => setExpiraEl(e.target.value)}
@@ -153,10 +169,12 @@ export const EmitForm = ({ user, emisor, onLogout }: Props) => {
 
         {error && <p className="error">{error}</p>}
 
-        <button type="submit" disabled={!idOk}>
+        <p className="privacy-note">KEEP protege los datos privados del destinatario y solo permite verificar la vigencia.</p>
+        <button type="submit" disabled={!idOk || !titulo.trim()}>
           Emitir certificado
         </button>
       </form>
+      </section>
 
       {emitida && (
         <>

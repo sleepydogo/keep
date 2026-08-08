@@ -49,7 +49,16 @@ export const ensureDeviceKey = async (
   register: (emisor: EmisorJubjub) => Promise<void>,
 ): Promise<EmisorJubjub> => {
   const clave = `user:${userId}`;
-  let hex = await idb<string | undefined>("readonly", (s) => s.get(clave));
+  const stored = await idb<unknown>("readonly", (s) => s.get(clave));
+  let hex =
+    typeof stored === "string"
+      ? stored
+      : stored &&
+          typeof stored === "object" &&
+          "emisorSecret" in stored &&
+          typeof stored.emisorSecret === "string"
+        ? stored.emisorSecret
+        : undefined;
 
   if (!hex) {
     hex = toHex(crypto.getRandomValues(new Uint8Array(32)));

@@ -45,6 +45,23 @@ db.exec(`
     expires_at TEXT NOT NULL,
     created_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS credentials (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id),
+    org_id TEXT NOT NULL REFERENCES orgs(id),
+    alias TEXT NOT NULL,
+    recipient_address TEXT NOT NULL,
+    address_type TEXT NOT NULL,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    expires_at TEXT,
+    validity_days INTEGER,
+    issuer_id TEXT NOT NULL,
+    public_key TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );
 `);
 
 // Migración suave desde schema ECDSA (public_key UNIQUE sin emisor_id)
@@ -65,4 +82,26 @@ if (cols.length && !cols.some((c) => c.name === "emisor_id")) {
       created_at TEXT NOT NULL
     );
   `);
+}
+
+const demoOrgId = "demo-org";
+const demoUserId = "demo-user";
+const demoCreatedAt = "2026-01-01T00:00:00.000Z";
+const demoExists = db
+  .prepare(`SELECT id FROM users WHERE username = ?`)
+  .get("demo");
+if (!demoExists) {
+  db.prepare(
+    `INSERT INTO orgs (id, name, created_at) VALUES (?, ?, ?)`,
+  ).run(demoOrgId, "Instituto KEEP Demo", demoCreatedAt);
+  db.prepare(
+    `INSERT INTO users (id, org_id, username, password_hash, created_at)
+     VALUES (?, ?, ?, ?, ?)`,
+  ).run(
+    demoUserId,
+    demoOrgId,
+    "demo",
+    "$2b$10$0DTvTCScmqG0KIid4eKixuepyFrAg5IwqBczOkVGFhThaKhFCyQCO",
+    demoCreatedAt,
+  );
 }
